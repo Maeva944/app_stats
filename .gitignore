@@ -1,41 +1,52 @@
-# Node.js dependencies
-node_modules/
+# 🛑 Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Logs
-logs/
-*.log
+pnpm-debug.log*
+lerna-debug.log*
 nohup.out
 debug.log
 error.log
 
-# Vue.js build files
+# 🛑 Node.js dependencies (Backend & Frontend)
+node_modules/
+
+# 🛑 Vue.js (Frontend)
 frontend/dist/
 frontend/node_modules/
+dist
+dist-ssr
+*.local
 
-# Environment variables
+# 🛑 PostgreSQL Data (évite d'envoyer la base de données Docker)
+pgdata/
+
+# 🛑 Fichiers sensibles (variables d’environnement)
 .env
 backend/.env
 frontend/.env
 
-# PostgreSQL Data (évite de push la base de données Docker)
-pgdata/
-
-# Docker
+# 🛑 Docker
 docker-compose.override.yml
 docker-compose.override.yml~
 Dockerfile~
 **/Dockerfile~
 
-# Editor & OS files
-.idea/
+# 🛑 Fichiers d’éditeurs et du système
 .vscode/
+!.vscode/extensions.json
+.idea/
 .DS_Store
 Thumbs.db
-
-# Misc
-*.bak
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.swp
 *.swo
+
+# 🛑 Autres fichiers inutiles
+*.bak
