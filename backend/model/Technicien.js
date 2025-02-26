@@ -1,10 +1,18 @@
 const pool = require('../db/db');
 
 class Technicien{
-    static async getAllTechniciens(){
-        try {
-            const result = await pool.query('SELECT * FROM Technicien');
-            return result.rows;
+    static async getAllTechniciens(search = "") {
+        try{ 
+        const searchTerm = search ? `%${search}%` : "%"; // ✅ Gère les cas où `search` est vide
+
+        const result = await pool.query(
+            `SELECT * FROM Technicien 
+             WHERE LOWER(nom) LIKE LOWER($1) 
+             OR LOWER(prenom) LIKE LOWER($1) 
+             OR CAST(matricule AS TEXT) LIKE $1`,
+            [searchTerm]
+        );
+        return result.rows;
         } catch (error) {
             console.error("Erreur lors de la récupération des techniciens :", error);
             throw error;
