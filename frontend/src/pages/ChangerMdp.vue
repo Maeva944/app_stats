@@ -39,7 +39,7 @@
   export default {
     data() {
       return {
-        oldPassword: "", // ✅ Champ pour l'ancien mot de passe
+        oldPassword: "", 
         newPassword: "",
         message: "",
         hasMinLength: false,
@@ -47,6 +47,7 @@
         hasLowerCase: false,
         hasNumber: false,
         hasSpecialChar: false,
+        isdifferent: false,
       };
     },
     computed: {
@@ -61,6 +62,7 @@
         this.hasLowerCase = /[a-z]/.test(this.newPassword);
         this.hasNumber = /[0-9]/.test(this.newPassword);
         this.hasSpecialChar = /[@$!%*?&]/.test(this.newPassword);
+        this.isdifferent = this.oldPassword !== this.newPassword
       },
       async changePassword() {
         const username = this.$route.query.username;

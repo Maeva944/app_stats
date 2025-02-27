@@ -20,6 +20,13 @@ router.post("/change", async (req, res) => {
         return res.status(400).json({ error: "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial." });
       }
 
+      // 🔹 Vérifier que le nouveau mot de passe est différent de l'ancien
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+        return res.status(400).json({ error: "Le nouveau mot de passe doit être différent de l'ancien." });
+        }
+
+
       // 🔹 Récupérer l'utilisateur depuis la base de données
       const result = await pool.query("SELECT * FROM Users WHERE username = $1", [username]);
 
