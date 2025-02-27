@@ -3,7 +3,7 @@ const pool = require('../db/db');
 class Technicien{
     static async getAllTechniciens(search = "") {
         try{ 
-        const searchTerm = search ? `%${search}%` : "%"; // ✅ Gère les cas où `search` est vide
+        const searchTerm = search ? `%${search}%` : "%"; 
 
         const result = await pool.query(
             `SELECT * FROM Technicien 

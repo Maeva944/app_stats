@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import Accueil from "./pages/Accueil.vue";
 import Connexion from "./pages/Connexion.vue";
+import nouveaumdp from "./pages/ChangerMdp.vue";
 import Inscription from "./pages/Inscription.vue";
 import Deconnection from "./pages/Deconnection.vue";
 import Technicien from "./pages/Technicien.vue";
@@ -11,7 +12,8 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            component: Accueil
+            component: Accueil,
+            meta: { requiresAuth: true }
         },
         {
             path: '/connexion',
@@ -20,6 +22,10 @@ const router = createRouter({
         {
             path: '/inscription',
             component: Inscription
+        },
+        {
+            path: '/nouveaumdp',
+            component: nouveaumdp
         },
         {
             path: '/deconnection',
@@ -36,5 +42,14 @@ const router = createRouter({
         }
     ]
 })
+
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = localStorage.getItem("token"); 
+    if (to.meta.requiresAuth && !isAuthenticated) {
+      next("/connexion"); 
+    } else {
+      next(); 
+    }
+  });
 
 export default router
