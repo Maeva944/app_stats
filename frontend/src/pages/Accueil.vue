@@ -1,8 +1,4 @@
 <template>
-   <nav>
-    <router-link to="/">Accueil</router-link>
-    <button @click="logout">Déconnexion</button>
-  </nav>
   <div class="search-container">
     <h2>Liste des Techniciens</h2>
 
@@ -75,31 +71,12 @@ export default {
     goToTechnicien(id) {
       this.$router.push(`/technicien/${id}`);
       this.showSuggestions = false;
-    },
-    logout() {
-      localStorage.removeItem("token");
-      localStorage.removeItem("username"); 
-      this.$router.push("/connexion"); 
     }
   }
 };
 </script>
 
 <style>
-
-nav {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  background-color: #f8f9fa;
-}
-button {
-  background: red;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  cursor: pointer;
-}
 /* Conteneur de recherche */
 .search-container {
   position: relative;

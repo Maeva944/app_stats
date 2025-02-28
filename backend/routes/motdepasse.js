@@ -5,14 +5,14 @@ const router = express.Router();
 
 router.post("/change", async (req, res) => {
     try {
-      const { username, oldPassword, newPassword } = req.body;
+      const { email, oldPassword, newPassword } = req.body;
 
       // 🔹 Vérifier que les champs sont bien remplis
-      if (!username || !oldPassword || !newPassword) {
+      if (!email || !oldPassword || !newPassword) {
         return res.status(400).json({ error: "Tous les champs sont requis." });
       }
 
-      console.log("🔍 Requête reçue :", { username, oldPassword, newPassword });
+      console.log("🔍 Requête reçue :", { email, oldPassword, newPassword });
 
       // 🔹 Vérifier la complexité du nouveau mot de passe
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
@@ -28,10 +28,10 @@ router.post("/change", async (req, res) => {
 
 
       // 🔹 Récupérer l'utilisateur depuis la base de données
-      const result = await pool.query("SELECT * FROM Users WHERE username = $1", [username]);
+      const result = await pool.query("SELECT * FROM Users WHERE email = $1", [email]);
 
       if (result.rows.length === 0) {
-        return res.status(404).json({ error: "Utilisateur non trouvé." });
+        return res.status(404).json({ error: "Email non trouvé." });
       }
 
       const user = result.rows[0];
@@ -47,8 +47,8 @@ router.post("/change", async (req, res) => {
 
       // 🔹 Mettre à jour le mot de passe dans la base
       await pool.query(
-        "UPDATE Users SET password = $1, must_change_password = FALSE WHERE username = $2",
-        [hashedPassword, username]
+        "UPDATE Users SET password = $1, must_change_password = FALSE WHERE email = $2",
+        [hashedPassword, email]
       );
 
       res.json({ message: "✅ Mot de passe mis à jour avec succès !" });

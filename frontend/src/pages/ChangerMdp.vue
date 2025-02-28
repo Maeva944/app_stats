@@ -65,7 +65,7 @@
         this.isdifferent = this.oldPassword !== this.newPassword
       },
       async changePassword() {
-        const username = this.$route.query.username;
+        const email = this.$route.query.email;
   
         if (!this.oldPassword) {
           this.message = "❌ L'ancien mot de passe est requis.";
@@ -82,8 +82,8 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
-              username, 
-              oldPassword: this.oldPassword, // ✅ Envoie l'ancien mot de passe
+              email, 
+              oldPassword: this.oldPassword,
               newPassword: this.newPassword 
             }),
           });

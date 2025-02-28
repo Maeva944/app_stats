@@ -1,10 +1,9 @@
 <template>
     <div class="login-container">
       <h1>Connexion</h1>
-      <a href="/inscription">Créer un compte</a>
       <br /><br />
   
-      <input type="text" placeholder="Nom" v-model="username" />
+      <input type="email" placeholder="Email" v-model="email" />
       <input type="password" placeholder="Mot de passe" v-model="password" />
       <button @click="handleLogin">Se connecter</button>
   
@@ -16,7 +15,7 @@
 export default {
   data() {
     return {
-      username: "",
+      email: "",
       password: "",
       errorMessage: "",
     };
@@ -27,7 +26,7 @@ export default {
         const response = await fetch("http://localhost:3000/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: this.username, password: this.password }),
+          body: JSON.stringify({ email: this.email, password: this.password }),
         });
 
         const data = await response.json();
@@ -38,12 +37,12 @@ export default {
         }
 
         if (data.mustChangePassword) {
-          this.$router.push(`/nouveaumdp?username=${this.username}`); 
+          this.$router.push(`/nouveaumdp?email=${this.email}`); 
           return;
         }
 
-        localStorage.setItem("token", data.token); // ✅ Stocker le token
-        this.$router.push("/"); // ✅ Redirige vers l'accueil
+        localStorage.setItem("token", data.token); 
+        this.$router.push("/");
       } catch (error) {
         this.errorMessage = "Erreur lors de la connexion.";
       }
