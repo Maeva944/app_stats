@@ -82,6 +82,7 @@ export default {
   position: relative;
   max-width: 400px;
   margin: auto;
+  padding: 10% 0;
 }
 
 /* Barre de recherche */

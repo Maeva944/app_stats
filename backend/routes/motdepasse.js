@@ -19,7 +19,10 @@ router.post("/change", async (req, res) => {
       if (!passwordRegex.test(newPassword)) {
         return res.status(400).json({ error: "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial." });
       }
+      
+      const result = await pool.query("SELECT * FROM Users WHERE email = $1", [email]);
 
+      const user = result.rows[0];
       // 🔹 Vérifier que le nouveau mot de passe est différent de l'ancien
         const isSamePassword = await bcrypt.compare(newPassword, user.password);
         if (isSamePassword) {
@@ -27,14 +30,10 @@ router.post("/change", async (req, res) => {
         }
 
 
-      // 🔹 Récupérer l'utilisateur depuis la base de données
-      const result = await pool.query("SELECT * FROM Users WHERE email = $1", [email]);
-
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Email non trouvé." });
       }
 
-      const user = result.rows[0];
 
       // 🔹 Vérifier que l'ancien mot de passe est correct
       const isMatch = await bcrypt.compare(oldPassword, user.password);

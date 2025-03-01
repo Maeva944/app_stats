@@ -36,6 +36,7 @@ header{
     display: flex;
     justify-content: space-between;
     color: #E60F04;
+    padding: 5%;
 }
 h1{
     width: 50%;
@@ -52,10 +53,11 @@ button {
     background: #E60F04;
     color: white;
     border: none;
-    padding: 2% 1%;
+    padding: 3% 1%;
     cursor: pointer;
-    width: 45%;
+    width: 50%;
     margin-left: 5%;
+    font-size: 12pt;
 }
 #home{
     text-decoration:none;

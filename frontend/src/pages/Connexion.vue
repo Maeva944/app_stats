@@ -4,8 +4,13 @@
       <br /><br />
   
       <input type="email" placeholder="Email" v-model="email" />
-      <input type="password" placeholder="Mot de passe" v-model="password" />
-      <button @click="handleLogin">Se connecter</button>
+      <div class="password-container">
+      <input :type="showPassword ? 'text' : 'password'" placeholder="Mot de passe" v-model="password" />
+      <button type="button" class="toggle-password" @click="togglePassword">
+        {{ showPassword ? "Masquer" : "Afficher" }}
+      </button>
+      </div>
+      <button @click="handleLogin" id="login-button">Se connecter</button>
   
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     </div>
@@ -18,9 +23,13 @@ export default {
       email: "",
       password: "",
       errorMessage: "",
+      showPassword: false,
     };
   },
   methods: {
+    togglePassword() {
+      this.showPassword = !this.showPassword; 
+    },
     async handleLogin() {
       try {
         const response = await fetch("http://localhost:3000/auth", {
@@ -50,32 +59,57 @@ export default {
   },
 };
 </script>
-  
-  <style>
-  .login-container {
-    max-width: 300px;
-    margin: auto;
-    text-align: center;
-  }
-  
-  input {
-    display: block;
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 8px;
-  }
-  
-  button {
-    width: 100%;
-    padding: 8px;
-    background: blue;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .error {
-    color: red;
-  }
+<style>
+body {
+  background-color: #eeecec;
+}
+h1 {
+  color: #333;
+}
+.login-container {
+  max-width: 290px;
+  margin: auto;
+  text-align: center;
+  padding: 15%;
+  margin-top: 15%;
+  background-color: #f4f1f1;
+}
+.login-container input {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+}
+#login-button {
+  min-width: 106%;
+  padding: 10px;
+  background: #1F68DE;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.login-container .password-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 107.5%;
+}
+.login-container .password-container input {
+  flex: 1;
+}
+.login-container .toggle-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  right: -1px;
+  top: 8px;
+  font-size: 16px;
+  color: #1F68DE;
+  width: 25%;
+}
+.error {
+  color: red;
+}
   </style>
   
