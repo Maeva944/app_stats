@@ -4,8 +4,9 @@ import Connexion from "./pages/Connexion.vue";
 import nouveaumdp from "./pages/ChangerMdp.vue";
 import Inscription from "./pages/Inscription.vue";
 import Deconnection from "./pages/Deconnection.vue";
-import Technicien from "./pages/Technicien.vue";
+import Importer from "./pages/Importer.vue";
 import NotFound from "./pages/NotFound.vue";
+import TechnicienDetails from "./pages/TechnicienDetails.vue";
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -32,8 +33,12 @@ const router = createRouter({
             component: Deconnection
         },
         {
-            path: '/technicien',
-            component: Technicien
+            path: '/importer',
+            component: Importer
+        },
+        {
+            path: '/techniciendetail/:id',
+            component: TechnicienDetails
         },
         {
             path: '/:pathMatch(.*)*', 

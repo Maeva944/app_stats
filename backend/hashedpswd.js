@@ -5,4 +5,4 @@ async function hashPassword(password) {
   console.log("Mot de passe haché :", hashedPassword);
 }
 
-hashPassword("456"); 
+hashPassword("123"); 

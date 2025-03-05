@@ -69,11 +69,11 @@ export default {
       }, 200);
     },
     goToTechnicien(id) {
-      this.$router.push(`/technicien/${id}`);
-      this.showSuggestions = false;
+        this.$router.push(`/techniciendetail/${id}`);
+        this.showSuggestions = false;
     }
   }
-};
+  };
 </script>
 
 <style>
