@@ -27,8 +27,20 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         console.log("📤 Mois reçu :", req.body.mois);
         console.log("📤 Année reçue :", req.body.annee);
 
-        const mois = req.body.mois;
+        
         const annee = parseInt(req.body.annee, 10);
+
+        const resultMois = await pool.query(
+            "SELECT id FROM mois WHERE nom = $1",
+            [req.body.mois]
+        );
+
+
+        if (resultMois.rows.length === 0) {
+            return res.status(400).json({ error: "Le mois spécifié n'existe pas dans la base de données." });
+        }
+
+        const mois = resultMois.rows[0].id;
     
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(req.file.buffer);
@@ -36,7 +48,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
         console.log("Fichier excel chargé :", req.file);
 
-        let SousCatégorie = [];
+        let SousCategorie = [];
         let matricules = new Set();
         let data = [];
         let categorie = "";
@@ -48,7 +60,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         //récupération des sous catégorie (la première ligne du fichier excel)
         worksheet.getRow(1).eachCell((cell, colNumber) => {
             if(colNumber > 1){
-                SousCatégorie.push(cell.value);
+                SousCategorie.push(cell.value);
             }
         })
 
@@ -62,50 +74,69 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         })
         //vérifier si les techniciens existe
         const matriculesArray = [...matricules];
-       
-        const result = await pool.query(
-            "SELECT MATRICULE FROM technicien WHERE matricule = ANY($1::int[])", [matriculesArray]
+        const resultTechniciens = await pool.query(
+            "SELECT id, matricule FROM technicien WHERE matricule = ANY($1::int[])",
+            [matriculesArray]
         );
-        
-        const existMatricules = new Set(result.rows.map(row => row.matricule));
-        const missingMatricules = matriculesArray.filter(mat => !existMatricules.has(mat));
 
-        if(missingMatricules.length > 0){
+        // Création d'un mapping { matricule: technicien_id }
+        const technicienMap = new Map(resultTechniciens.rows.map(t => [t.matricule, t.id]));
+       
+        
+       
+
+        const missingMatricules = matriculesArray.filter(mat => !technicienMap.has(mat));
+        if (missingMatricules.length > 0) {
             return res.status(400).json({
-                error: "Certain technicien n'existent pas veuiller les ajouters",
+                error: "Certains techniciens n'existent pas, veuillez les ajouter.",
                 missing: missingMatricules
             });
         }
-
         //Importer les stats dans la BDD 
-        worksheet.eachRow((row, rowNumber, matricule)=>{
-            if(rowNumber === 1)return;
-            if(!matricule)return;
-            
-            SousCatégorie.forEach((SousCatégorie, index)=>{
-                const valeur = row.getCell(index + 2).value;
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return;
+            let matricule = extractMatricule(row.getCell(1).value);
+            if (!matricule) return;
+            const technicienId = technicienMap.get(matricule);
+            if (!technicienId) {
+                console.warn(`❌ Matricule ${matricule} non trouvé dans la base.`);
+                return;
+            }
 
-                if(valeur !== null && valeur !== undefined){
-                    data.push({
-                        matricule,
-                        categorie: "Qualité Technique",
-                        sous_categorie: SousCatégorie,
-                        valeur: toString(valeur),
-                        mois: mois,
-                        annee: annee
-                    })
+            let donnee = {};
+
+            SousCategorie.forEach((SousCategorie, index) => {
+                const valeur = row.getCell(index + 2).value;
+                if (valeur !== null && valeur !== undefined) {
+                    donnee[SousCategorie] = valeur.toString();
                 }
-            })
-            
+            });
+
+            data.push({
+                technicien_id: technicienId,
+                matricule,
+                donnee: JSON.stringify(donnee),
+                categorie,
+                mois: mois,
+                annee: annee
+            });
         });
 
-        for (let item of data){
-            await pool.query(
-                `INSERT INTO Statistiques (matricule, categorie, sous_categorie, valeur, mois, annee) VALUES ($1, $2, $3, $4, $5, $6)`,
-                [item.matricule, item.categorie, item.sous_categorie, item.valeur, item.mois, item.annee]
-            );
-        }
-        res.json({ message: "Données insérées avec succès !" });
+        console.log("📊 Données JSONB à insérer :", data);
+
+        // Insertion optimisée avec JSONB et Promise.all
+        await Promise.all(
+            data.map(item =>
+                pool.query(
+                    `INSERT INTO Statistiques (technicien_id, matricule,categorie, donnee, mois_id, annee) 
+                     VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
+                    [item.technicien_id, item.matricule,item.categorie, item.donnee, item.mois, item.annee]
+                )
+            )
+        );
+
+        console.log("💾 Nombre de lignes insérées :", data.length);
+        res.json({ message: "Données JSONB insérées avec succès !" });
     } catch (error) {
         console.error("❌ Erreur lors du traitement du fichier :", error);
         res.status(500).json({ error: "Erreur serveur." });
