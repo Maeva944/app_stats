@@ -2,7 +2,14 @@
   <div class="import-container">
     <h2>Importer des Statistiques</h2>
 
-    
+    <label for="categorie">Veuillez choisir une catégorie :</label>
+    <select v-model="categorieChoisie" id="categorie">
+        <option value="Qualité Techniques">Qualité Techniques</option>
+        <option value="NPS">NPS</option>
+        <option value="Proposition">Proposition</option>
+        <option value="Prime">Prime</option>
+    </select>
+
     <label for="mois">Mois :</label>
     <select v-model="moisChoisi" id="mois">
       <option v-for="mois in moisDisponibles" :key="mois.id" :value="mois.nom">
@@ -41,7 +48,8 @@ export default {
       selectedFile: null,
       errorMessage: "", 
       successMessage: "", 
-      missingMatricules: [], 
+      missingMatricules: [],
+      categorieChoisie: "",
     };
   },
   async created() {
@@ -73,6 +81,7 @@ export default {
       formData.append("file", this.selectedFile);
       formData.append("mois", this.moisChoisi);
       formData.append("annee", this.anneeChoisie);
+      formData.append("categorie", this.categorieChoisie);
 
       try {
         const response = await fetch("http://localhost:3000/convert/upload", {

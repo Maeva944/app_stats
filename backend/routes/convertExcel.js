@@ -21,11 +21,12 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     console.log("✅ req.mois :", req.body);
     console.log("✅ req.file :", req.file ? req.file.originalname : "Aucun fichier reçu");
     try{
-        if(!req.body.mois || !req.body.annee || !req.file ){
-            return res.status(400).json({ error : "Le fichier, mois et année son requis."})
+        if(!req.body.categorie || !req.body.mois || !req.body.annee || !req.file ){
+            return res.status(400).json({ error : "La catégorie, Le fichier, le mois et l'année son requis."})
         }
         console.log("📤 Mois reçu :", req.body.mois);
         console.log("📤 Année reçue :", req.body.annee);
+        console.log("📤 catégorie reçue :", req.body.categorie);
 
         
         const annee = parseInt(req.body.annee, 10);
@@ -54,7 +55,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         let categorie = "";
         
         if (workbook.worksheets[0]) {
-            categorie = "Qualité Technique";
+            categorie = req.body.categorie;
         }
         console.log(categorie);
         //récupération des sous catégorie (la première ligne du fichier excel)
