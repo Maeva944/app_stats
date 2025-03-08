@@ -21,8 +21,8 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     console.log("✅ req.mois :", req.body);
     console.log("✅ req.file :", req.file ? req.file.originalname : "Aucun fichier reçu");
     try{
-        if(!req.body.categorie || !req.body.mois || !req.body.annee || !req.file ){
-            return res.status(400).json({ error : "La catégorie, Le fichier, le mois et l'année son requis."})
+        if(!req.body.categorie  || !req.body.annee || !req.file ){
+            return res.status(400).json({ error : "La catégorie, Le fichiers et l'année son requis."})
         }
         console.log("📤 Mois reçu :", req.body.mois);
         console.log("📤 Année reçue :", req.body.annee);
@@ -37,11 +37,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         );
 
 
-        if (resultMois.rows.length === 0) {
-            return res.status(400).json({ error: "Le mois spécifié n'existe pas dans la base de données." });
-        }
+        
 
-        const mois = resultMois.rows[0].id;
+        const mois = resultMois.id;
     
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(req.file.buffer);
@@ -125,16 +123,27 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
         console.log("📊 Données JSONB à insérer :", data);
 
-        // Insertion optimisée avec JSONB et Promise.all
-        await Promise.all(
-            data.map(item =>
-                pool.query(
-                    `INSERT INTO Statistiques (technicien_id, matricule,categorie, donnee, mois_id, annee) 
-                     VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
-                    [item.technicien_id, item.matricule,item.categorie, item.donnee, item.mois, item.annee]
+        if(!mois === ""){
+            await Promise.all(
+                data.map(item =>
+                    pool.query(
+                        `INSERT INTO Statistiques (technicien_id, matricule,categorie, donnee, mois_id, annee) 
+                         VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
+                        [item.technicien_id, item.matricule,item.categorie, item.donnee, item.mois, item.annee]
+                    )
                 )
-            )
-        );
+            );
+        }else {
+            await Promise.all(
+                data.map(item =>
+                    pool.query(
+                        `INSERT INTO Statistiques (technicien_id, matricule,categorie, donnee, mois_id, annee) 
+                         VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
+                        [item.technicien_id, item.matricule,item.categorie, item.donnee, null, item.annee]
+                    )
+                )
+            );
+        }
 
         console.log("💾 Nombre de lignes insérées :", data.length);
         res.json({ message: "Données JSONB insérées avec succès !" });
