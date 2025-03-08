@@ -3,13 +3,13 @@ const pool = require("../db/db");
 const router = express.Router();
 
 // 📌 Route pour récupérer les statistiques d'un technicien par matricule avec mois et année
-router.get("/:matricule", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
-    const { matricule } = req.params;
+    const { id } = req.params;
     let { mois, annee } = req.query; // Mois et année passés en paramètre de requête
 
     // 🔹 Vérifier si le technicien existe
-    const checkTechnicien = await pool.query("SELECT * FROM Technicien WHERE matricule = $1", [matricule]);
+    const checkTechnicien = await pool.query("SELECT * FROM Technicien WHERE id = $1", [id]);
     if (checkTechnicien.rows.length === 0) {
       return res.status(404).json({ error: "Technicien non trouvé." });
     }
@@ -28,29 +28,44 @@ router.get("/:matricule", async (req, res) => {
       return res.status(400).json({ error: "Mois ou année invalide." });
     }
 
-    // 🔹 Récupérer les statistiques associées au technicien pour le mois et l’année donnés
-    const result = await pool.query(
-      `SELECT categorie, sous_categorie, valeur 
-       FROM Statistiques 
-       WHERE matricule = $1 AND mois = $2 AND annee = $3`, 
-      [matricule, mois, annee]
-    );
+    let result;
+    if (mois === null) {
+      result = await pool.query(
+        `SELECT categorie, donnee 
+         FROM Statistiques 
+         WHERE technicien_id = $1 and mois_id is null and annee = $2`, 
+        [id, annee]
+      );
+    } else {
+      result = await pool.query(
+        `SELECT categorie, donnee 
+         FROM Statistiques 
+         WHERE technicien_id = $1 AND mois_id = $2 AND annee = $3`, 
+        [id, mois, annee]
+      );
+    }
+    console.log("📊 Résultats SQL :", result.rows);
 
-    // 🔹 Organiser les données sous forme de catégories avec sous-catégories
-    const stats = {};
-    result.rows.forEach((row) => {
-      if (!stats[row.categorie]) {
-        stats[row.categorie] = [];
-      }
-      stats[row.categorie].push({ sous_categorie: row.sous_categorie, valeur: row.valeur });
-    });
+      let statistiquesTransformees = {};
 
-    res.json({ 
-      technicien: checkTechnicien.rows[0], 
-      statistiques: stats, 
-      mois: mois, 
-      annee: annee 
-    });
+      result.rows.forEach(stat => {
+        const {categorie, donnee, mois_id, annee } = stat;
+
+        if (!statistiquesTransformees[categorie]) {
+          statistiquesTransformees[categorie] = {
+            mois: mois_id,
+            annee: annee,
+            data : []
+          };
+        }
+        console.log(`📂 Catégorie : ${categorie} (Mois: ${mois}, Année: ${annee})`);
+        Object.entries(donnee).forEach(([sousCategorie, valeur]) => {
+          statistiquesTransformees[categorie].data.push({
+            sous_categorie: sousCategorie.trim(),
+            valeur: parseFloat(valeur) * 100 // Conversion en pourcentage
+          });
+        });
+      });
 
   } catch (error) {
     console.error("❌ Erreur lors de la récupération des statistiques :", error);
@@ -59,3 +74,5 @@ router.get("/:matricule", async (req, res) => {
 });
 
 module.exports = router;
+
+

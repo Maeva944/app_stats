@@ -10,6 +10,20 @@
     </div>
   </div>
 
+  <label for="mois">Mois :</label>
+    <select v-model="moisChoisi" id="mois" @change="updateStats">
+      <option v-for="mois in moisDisponibles" :key="mois.id" :value="mois.id">
+        {{ mois.nom }}
+      </option>
+    </select>
+    
+    <label for="annee">Année :</label>
+    <input @change="updateStats" type="number" id="annee" v-model="anneeChoisie" min="2000" max="2100" />
+
+    <button @click="toggleAnnee" class="toggle-annee">
+      {{ aLAnnee ? "Voir par Mois" : "À l'année" }}
+    </button>
+
   <!-- 🔹 Affichage des catégories si elles existent -->
   <div v-if="Object.keys(statistiques).length > 0" class="categories">
     <button
@@ -26,9 +40,10 @@
   <div v-if="statistiques[categorieActive]" class="stat-card-container">
     <div v-for="(stat, index) in statistiques[categorieActive]" :key="index" class="stat-card">
       <p class="stat-title">{{ stat.sous_categorie }}</p>
-      <p :class="{ 'stat-value': true, 'high': stat.valeur >= 80, 'low': stat.valeur < 50 }">
+      <p v-if="stat.valeur !== undefined" :class="{ 'stat-value': true, 'high': stat.valeur >= 80, 'low': stat.valeur < 50 }">
         {{ stat.valeur.toFixed(1) }}%
       </p>
+      <p v-else class="stat-value">N/A</p>
     </div>
   </div>
 
@@ -39,61 +54,80 @@
 export default {
   data() {
     return {
+      moisDisponibles: [],
+      moisChoisi: new Date().getMonth() + 1,
+      anneeChoisie: new Date().getFullYear(),
       technicien: null,
       statistiques: {},
       categorieActive: "",
       defaultPhoto: "https://via.placeholder.com/100",
+      aLAnnee: false, 
     };
   },
-
-  async created() {
-    const id = this.$route.params.id; // ✅ Récupération correcte de l'ID
+  async created(){
+    await this.fetchMois();
+    await this.fetchTechnicien();
+    await this.fetchStatistiques();
+  },
+  
+  methods: {
+    async fetchTechnicien() {
+    const id = this.$route.params.id; 
     try {
-      const response = await fetch(`http://localhost:3000/techniciendetail/${id}`); // ✅ Vérifie l'URL
-      if (!response.ok) {
-        throw new Error("Erreur serveur : " + response.status);
-      }
-      const data = await response.json();
+        const response = await fetch(`http://localhost:3000/techniciendetail/${id}`);
+        if (!response.ok) {
+            throw new Error("Erreur serveur : " + response.status);
+        }
+        const data = await response.json();
 
-      if (data.error) {
-        alert(data.error);
-      } else {
-        this.technicien = data.technicien;
-        
-        // ✅ Transformation des statistiques pour correspondre au format attendu
-        this.statistiques = this.transformerStatistiques(data.statistiques);
-        
-        // ✅ Définir la première catégorie comme active par défaut
-        this.categorieActive = Object.keys(this.statistiques)[0] || "";
-      }
+        if (data.error) {
+            alert(data.error);
+        } else {
+            this.technicien = data.technicien;
+        }
     } catch (error) {
-      console.error("❌ Erreur de récupération des statistiques :", error);
+        console.error("❌ Erreur de récupération des infos du technicien :", error);
+    }
+  },
+    async fetchMois() {
+      try {
+        const response = await fetch("http://localhost:3000/mois");
+        if (!response.ok) {
+          throw new Error("Erreur serveur lors du chargement des mois.");
+        }
+        this.moisDisponibles = await response.json();
+      } catch (error) {
+        console.error("Impossible de charger les mois :", error);
+        this.errorMessage = "Impossible de charger les mois.";
+      }
+    },
+    async fetchStatistiques() {
+    const id = this.$route.params.id;
+    if (!id) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/statistiques/${id}?mois_id=${this.moisChoisi}&annee=${this.anneeChoisie}`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        this.statistiques = this.transformerStatistiques(data.statistiques); 
+        this.categorieActive = Object.keys(this.statistiques)[0] || "";
+
+    } catch (error) {
+        console.error("❌ Erreur de récupération des statistiques :", error);
     }
   },
 
-  methods: {
-    transformerStatistiques(statistiquesArray) {
-      let statistiquesTransformees = {};
 
-      statistiquesArray.forEach(stat => {
-        if (!statistiquesTransformees[stat.categorie]) {
-          statistiquesTransformees[stat.categorie] = [];
-        }
-
-        // ✅ Parcourir les données JSON (donnee)
-        Object.entries(stat.donnee).forEach(([sousCategorie, valeur]) => {
-          statistiquesTransformees[stat.categorie].push({
-            sous_categorie: sousCategorie.trim(),
-            valeur: parseFloat(valeur) * 100 // Conversion en pourcentage
-          });
-        });
-      });
-
-      console.log("📊 Données transformées :", statistiquesTransformees);
-      return statistiquesTransformees;
-    }
+    updateStats() {
+      this.fetchStatistiques(); // 🔹 Recharge les stats quand l'utilisateur change le mois ou l'année
+    },
+    toggleAnnee() {
+      this.aLAnnee = !this.aLAnnee;
+      this.fetchStatistiques(); // 🔹 Recharge avec ou sans mois
+    }  
   }
-};
+}
 </script>
 
 <style>
