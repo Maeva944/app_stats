@@ -102,22 +102,45 @@ export default {
       }
     },
     async fetchStatistiques() {
-    const id = this.$route.params.id;
-    if (!id) return;
+  const id = this.$route.params.id;
+  if (!id) return;
 
-    try {
-        const response = await fetch(`http://localhost:3000/statistiques/${id}?mois_id=${this.moisChoisi}&annee=${this.anneeChoisie}`);
-        if (!response.ok) return;
-        const data = await response.json();
-        console.log("📌 Données reçues du backend :", data); // Vérifie la structure de l'objet
+  // Vérifie si `anneeChoisie` est définie
+  if (!this.anneeChoisie) {
+    console.error("❌ Erreur : L'année choisie est undefined !");
+    return;
+  }
 
-        this.statistiques = data; 
-        this.categorieActive = Object.keys(this.statistiques)[0] || "";
+  // Construction de l'URL de base
+  let url = `http://localhost:3000/statistiques/${id}?annee=${this.anneeChoisie}&aLAnnee=${this.aLAnnee}`;
 
-    } catch (error) {
-        console.error("❌ Erreur de récupération des statistiques :", error);
+  // Ajout de `mois_id` si ce n'est PAS une requête annuelle
+  if (!this.aLAnnee && this.moisChoisi) {
+    url += `&mois_id=${this.moisChoisi}`;
+  }
+
+  console.log("📌 URL générée :", url); // Vérifie si `annee` et `mois_id` sont bien là
+
+  try {
+    const response = await fetch(url);
+
+    // Vérification de la réponse HTTP
+    if (!response.ok) {
+      console.error("❌ Erreur HTTP :", response.status);
+      return;
     }
-  },
+
+    const data = await response.json();
+
+    console.log("📊 Données reçues :", data);
+    this.statistiques = data;
+    this.categorieActive = Object.keys(this.statistiques)[0] || "";
+
+  } catch (error) {
+    console.error("❌ Erreur de récupération des statistiques :", error);
+  }
+},
+
 
 
     updateStats() {

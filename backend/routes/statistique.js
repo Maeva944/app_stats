@@ -6,9 +6,8 @@ const router = express.Router();
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    let { mois_id, annee } = req.query; // Mois et année passés en paramètre de requête
-    console.log("Query Params:", req.query); // Debugging
-    console.log("Mois:", mois_id, "Année:", annee); 
+    let { mois_id, annee, aLAnnee  } = req.query; // Mois et année passés en paramètre de requête
+    console.log("ID:", id, "Mois:", mois_id, "Année:", annee, "À l'année:", aLAnnee); 
     // 🔹 Vérifier si le technicien existe
     const checkTechnicien = await pool.query("SELECT * FROM Technicien WHERE id = $1", [id]);
     if (checkTechnicien.rows.length === 0) {
@@ -29,12 +28,16 @@ router.get("/:id", async (req, res) => {
       return res.status(400).json({ error: "Mois ou année invalide." });
     }
 
+    let query;
+    let params;
+
     let result;
-    if (mois_id === null) {
+
+    if (aLAnnee === "true") {
       result = await pool.query(
-        `SELECT categorie, donnee 
+        `SELECT categorie, donnee, annee 
          FROM Statistiques 
-         WHERE technicien_id = $1 and mois_id is null and annee = $2`, 
+         WHERE technicien_id = $1 AND mois_id IS NULL AND annee = $2`, 
         [id, annee]
       );
     } else {
@@ -45,6 +48,9 @@ router.get("/:id", async (req, res) => {
         [id, mois_id, annee]
       );
     }
+    
+    console.log("🛠 Requête SQL générée :", query);
+    console.log("📊 Paramètres SQL envoyés :", params);
     console.log("📊 Résultats SQL :", result.rows);
 
       let statistiquesTransformees = {};
@@ -54,7 +60,7 @@ router.get("/:id", async (req, res) => {
 
         if (!statistiquesTransformees[categorie]) {
           statistiquesTransformees[categorie] = {
-            mois: mois_id,
+            mois: mois_id || null,
             annee: annee,
             data : []
           };
