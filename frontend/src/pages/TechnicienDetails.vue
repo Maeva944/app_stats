@@ -12,7 +12,7 @@
 
   <label for="mois">Mois :</label>
     <select v-model="moisChoisi" id="mois" @change="updateStats">
-      <option v-for="mois in moisDisponibles" :key="mois.id" :value="mois.id">
+      <option v-for="mois in moisDisponibles" :key="mois.id" :value="mois.id" >
         {{ mois.nom }}
       </option>
     </select>
@@ -38,7 +38,7 @@
 
   <!-- 🔹 Affichage des statistiques par catégorie -->
   <div v-if="statistiques[categorieActive]" class="stat-card-container">
-    <div v-for="(stat, index) in statistiques[categorieActive]" :key="index" class="stat-card">
+    <div v-for="(stat, index) in statistiques[categorieActive].data" :key="index" class="stat-card">
       <p class="stat-title">{{ stat.sous_categorie }}</p>
       <p v-if="stat.valeur !== undefined" :class="{ 'stat-value': true, 'high': stat.valeur >= 80, 'low': stat.valeur < 50 }">
         {{ stat.valeur.toFixed(1) }}%
@@ -108,9 +108,10 @@ export default {
     try {
         const response = await fetch(`http://localhost:3000/statistiques/${id}?mois_id=${this.moisChoisi}&annee=${this.anneeChoisie}`);
         if (!response.ok) return;
-
         const data = await response.json();
-        this.statistiques = this.transformerStatistiques(data.statistiques); 
+        console.log("📌 Données reçues du backend :", data); // Vérifie la structure de l'objet
+
+        this.statistiques = data; 
         this.categorieActive = Object.keys(this.statistiques)[0] || "";
 
     } catch (error) {
@@ -120,7 +121,7 @@ export default {
 
 
     updateStats() {
-      this.fetchStatistiques(); // 🔹 Recharge les stats quand l'utilisateur change le mois ou l'année
+      this.fetchStatistiques(); 
     },
     toggleAnnee() {
       this.aLAnnee = !this.aLAnnee;

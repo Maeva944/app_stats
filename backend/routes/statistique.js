@@ -6,8 +6,9 @@ const router = express.Router();
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    let { mois, annee } = req.query; // Mois et année passés en paramètre de requête
-
+    let { mois_id, annee } = req.query; // Mois et année passés en paramètre de requête
+    console.log("Query Params:", req.query); // Debugging
+    console.log("Mois:", mois_id, "Année:", annee); 
     // 🔹 Vérifier si le technicien existe
     const checkTechnicien = await pool.query("SELECT * FROM Technicien WHERE id = $1", [id]);
     if (checkTechnicien.rows.length === 0) {
@@ -15,21 +16,21 @@ router.get("/:id", async (req, res) => {
     }
 
     // 🔹 Si aucun mois et année ne sont fournis, utiliser le mois et l'année actuels
-    if (!mois || !annee) {
+    if (!mois_id || !annee) {
       const currentDate = new Date();
-      mois = mois || (currentDate.getMonth() + 1); // Mois actuel (1 = janvier)
+      mois_id = mois_id || (currentDate.getMonth() + 1); // Mois actuel (1 = janvier)
       annee = annee || currentDate.getFullYear(); // Année actuelle
     }
 
     // 🔹 Vérifier si le mois est valide (entre 1 et 12)
-    mois = parseInt(mois, 10);
+    mois_id = parseInt(mois_id, 10);
     annee = parseInt(annee, 10);
-    if (isNaN(mois) || mois < 1 || mois > 12 || isNaN(annee)) {
+    if (isNaN(mois_id) || mois_id < 1 || mois_id > 12 || isNaN(annee)) {
       return res.status(400).json({ error: "Mois ou année invalide." });
     }
 
     let result;
-    if (mois === null) {
+    if (mois_id === null) {
       result = await pool.query(
         `SELECT categorie, donnee 
          FROM Statistiques 
@@ -38,10 +39,10 @@ router.get("/:id", async (req, res) => {
       );
     } else {
       result = await pool.query(
-        `SELECT categorie, donnee 
+        `SELECT categorie, donnee, mois_id, annee 
          FROM Statistiques 
          WHERE technicien_id = $1 AND mois_id = $2 AND annee = $3`, 
-        [id, mois, annee]
+        [id, mois_id, annee]
       );
     }
     console.log("📊 Résultats SQL :", result.rows);
@@ -58,7 +59,7 @@ router.get("/:id", async (req, res) => {
             data : []
           };
         }
-        console.log(`📂 Catégorie : ${categorie} (Mois: ${mois}, Année: ${annee})`);
+        console.log(`📂 Catégorie : ${categorie} (Mois: ${mois_id}, Année: ${annee})`);
         Object.entries(donnee).forEach(([sousCategorie, valeur]) => {
           statistiquesTransformees[categorie].data.push({
             sous_categorie: sousCategorie.trim(),
@@ -66,6 +67,9 @@ router.get("/:id", async (req, res) => {
           });
         });
       });
+      console.log("📤 Envoi de la réponse...");
+      res.json(statistiquesTransformees);
+      console.log("✅ Réponse envoyée !");
 
   } catch (error) {
     console.error("❌ Erreur lors de la récupération des statistiques :", error);
