@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import { getData } from "../api";
+import { postFormData } from "../api";
 export default {
   data() {
     return {
@@ -53,18 +55,17 @@ export default {
     };
   },
   async created() {
-    try {
-      const response = await fetch("http://localhost:3000/mois");
-      if (!response.ok) {
-        throw new Error("Erreur serveur lors du chargement des mois.");
-      }
-      this.moisDisponibles = await response.json();
-    } catch (error) {
-      console.error("Impossible de charger les mois :", error);
-      this.errorMessage = "Impossible de charger les mois.";
-    }
+    await this.fetchMois;
   },
   methods: {
+    async fetchMois() {
+    try {
+      this.moisDisponibles = await getData("/mois");
+    } catch (error) {
+      console.error("❌ Impossible de charger les mois :", error);
+      this.errorMessage = "Impossible de charger les mois.";
+    }
+    },
     handleFileUpload(event) {
       this.selectedFile = event.target.files[0];
       this.errorMessage = "";
@@ -72,34 +73,24 @@ export default {
       this.missingMatricules = [];
     },
     async uploadFile() {
-      if (!this.selectedFile) {
-        this.errorMessage = "Veuillez sélectionner un fichier.";
-        return;
-      }
+  if (!this.selectedFile) {
+    this.errorMessage = "Veuillez sélectionner un fichier.";
+    return;
+  }
 
-      const formData = new FormData();
-      formData.append("file", this.selectedFile);
-      formData.append("mois", this.moisChoisi);
-      formData.append("annee", this.anneeChoisie);
-      formData.append("categorie", this.categorieChoisie);
+  const formData = new FormData();
+  formData.append("file", this.selectedFile);
+  formData.append("mois", this.moisChoisi);
+  formData.append("annee", this.anneeChoisie);
+  formData.append("categorie", this.categorieChoisie);
 
-      try {
-        const response = await fetch("http://localhost:3000/convert/upload", {
-          method: "POST",
-          body: formData,
-        });
+  try {
+    const data = await postFormData("/convert/upload", formData);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          this.errorMessage = data.error || "Erreur lors de l'importation.";
-          this.missingMatricules = data.missing || [];
-          return;
-        }
-
-        this.successMessage = " Données importées avec succès !";
-        this.selectedFile = null;
-      } catch (error) {
+    this.successMessage = "✅ Données importées avec succès !";
+    this.selectedFile = null;
+    this.missingMatricules = data.missing || [];
+  }catch (error) {
         this.errorMessage = " Une erreur est survenue.";
       }
     },

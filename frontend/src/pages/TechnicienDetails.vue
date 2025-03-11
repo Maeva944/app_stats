@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import { getData } from "../api";
 export default {
   data() {
     return {
@@ -74,68 +75,44 @@ export default {
     async fetchTechnicien() {
     const id = this.$route.params.id; 
     try {
-        const response = await fetch(`http://localhost:3000/techniciendetail/${id}`);
-        if (!response.ok) {
-            throw new Error("Erreur serveur : " + response.status);
-        }
-        const data = await response.json();
+    const data = await getData(`/techniciendetail/${id}`);
 
-        if (data.error) {
-            alert(data.error);
-        } else {
-            this.technicien = data.technicien;
-        }
-    } catch (error) {
-        console.error("❌ Erreur de récupération des infos du technicien :", error);
-    }
-  },
-    async fetchMois() {
-      try {
-        const response = await fetch("http://localhost:3000/mois");
-        if (!response.ok) {
-          throw new Error("Erreur serveur lors du chargement des mois.");
-        }
-        this.moisDisponibles = await response.json();
-      } catch (error) {
-        console.error("Impossible de charger les mois :", error);
-        this.errorMessage = "Impossible de charger les mois.";
-      }
-    },
-    async fetchStatistiques() {
-  const id = this.$route.params.id;
-  if (!id) return;
-
-  // Vérifie si `anneeChoisie` est définie
-  if (!this.anneeChoisie) {
-    console.error("❌ Erreur : L'année choisie est undefined !");
-    return;
-  }
-
-  // Construction de l'URL de base
-  let url = `http://localhost:3000/statistiques/${id}?annee=${this.anneeChoisie}&aLAnnee=${this.aLAnnee}`;
-
-  // Ajout de `mois_id` si ce n'est PAS une requête annuelle
-  if (!this.aLAnnee && this.moisChoisi) {
-    url += `&mois_id=${this.moisChoisi}`;
-  }
-
-  console.log("📌 URL générée :", url); // Vérifie si `annee` et `mois_id` sont bien là
-
-  try {
-    const response = await fetch(url);
-
-    // Vérification de la réponse HTTP
-    if (!response.ok) {
-      console.error("❌ Erreur HTTP :", response.status);
+    if (data.error) {
+      alert(data.error);
       return;
     }
 
-    const data = await response.json();
+    this.technicien = data.technicien;
+    
+    console.log("✅ Technicien récupéré :", this.technicien);
+  } catch (error) {
+    console.error("❌ Erreur de récupération des infos du technicien :", error);
+  }
+  },
+  async fetchMois() {
+  try {
+    this.moisDisponibles = await getData("/mois");
+  } catch (error) {
+    console.error("❌ Impossible de charger les mois :", error);
+    this.errorMessage = "Impossible de charger les mois.";
+  }
+  },
+  async fetchStatistiques() {
+  const id = this.$route.params.id;
+  if (!id) return;
 
-    console.log("📊 Données reçues :", data);
-    this.statistiques = data;
+  let endpoint = `/statistiques/${id}?annee=${this.anneeChoisie}&aLAnnee=${this.aLAnnee}`;
+  
+  if (!this.aLAnnee && this.moisChoisi) {
+    endpoint += `&mois_id=${this.moisChoisi}`;
+  }
+
+  try {
+    // 🔹 Utilisation de getData() directement, sans refaire fetch()
+    this.statistiques = await getData(endpoint);
+    
+    console.log("📊 Données reçues :", this.statistiques);
     this.categorieActive = Object.keys(this.statistiques)[0] || "";
-
   } catch (error) {
     console.error("❌ Erreur de récupération des statistiques :", error);
   }
