@@ -31,15 +31,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         
         const annee = parseInt(req.body.annee, 10);
 
-        const resultMois = await pool.query(
-            "SELECT id FROM mois WHERE nom = $1",
-            [req.body.mois]
-        );
-
-
-        
-
-        const mois = resultMois.id;
+        let mois = req.body.mois;
     
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(req.file.buffer);
@@ -116,34 +108,30 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                 matricule,
                 donnee: JSON.stringify(donnee),
                 categorie,
-                mois: mois,
+                mois: parseInt(mois, 10),
                 annee: annee
             });
         });
 
         console.log("📊 Données JSONB à insérer :", data);
 
-        if(!mois === ""){
-            await Promise.all(
-                data.map(item =>
-                    pool.query(
-                        `INSERT INTO Statistiques (technicien_id, matricule,categorie, donnee, mois_id, annee) 
-                         VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
-                        [item.technicien_id, item.matricule,item.categorie, item.donnee, item.mois, item.annee]
-                    )
+        await Promise.all(
+            data.map(item =>
+                pool.query(
+                    `INSERT INTO Statistiques (technicien_id, matricule, categorie, donnee, mois_id, annee) 
+                     VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
+                    [
+                        item.technicien_id,
+                        item.matricule,
+                        item.categorie,
+                        item.donnee,
+                        item.mois ? parseInt(item.mois, 10) : null, // ✅ Stocke correctement `mois`
+                        item.annee
+                    ]
                 )
-            );
-        }else {
-            await Promise.all(
-                data.map(item =>
-                    pool.query(
-                        `INSERT INTO Statistiques (technicien_id, matricule,categorie, donnee, mois_id, annee) 
-                         VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
-                        [item.technicien_id, item.matricule,item.categorie, item.donnee, null, item.annee]
-                    )
-                )
-            );
-        }
+            )
+        );
+        
 
         console.log("💾 Nombre de lignes insérées :", data.length);
         res.json({ message: "Données JSONB insérées avec succès !" });

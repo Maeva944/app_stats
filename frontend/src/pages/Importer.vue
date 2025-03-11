@@ -12,7 +12,7 @@
 
     <label for="mois">Mois :</label>
     <select v-model="moisChoisi" id="mois">
-      <option v-for="mois in moisDisponibles" :key="mois.id" :value="mois.nom">
+      <option v-for="mois in moisDisponibles" :key="mois.id" :value="mois.id">
         {{ mois.nom }}
       </option>
     </select>
@@ -55,7 +55,7 @@ export default {
     };
   },
   async created() {
-    await this.fetchMois;
+    await this.fetchMois();
   },
   methods: {
     async fetchMois() {
