@@ -108,15 +108,34 @@ export default {
   }
 
   try {
-    // 🔹 Utilisation de getData() directement, sans refaire fetch()
+    // 🔹 Récupération des statistiques
     this.statistiques = await getData(endpoint);
     
-    console.log("📊 Données reçues :", this.statistiques);
+    // 🔹 Trier les sous-catégories dans chaque catégorie
+    Object.keys(this.statistiques).forEach(categorie => {
+      if (Array.isArray(this.statistiques[categorie].data)) { 
+        this.statistiques[categorie].data.sort((a, b) => {
+          const keyA = a.sous_categorie.toLowerCase();
+          const keyB = b.sous_categorie.toLowerCase();
+          const isGlobalA = keyA.includes("global");
+          const isGlobalB = keyB.includes("global");
+
+          if (isGlobalA && !isGlobalB) return 1; 
+          if (!isGlobalA && isGlobalB) return -1; 
+          return 0;
+        });
+      } else {
+        console.warn(`⚠️ La catégorie "${categorie}" ne contient pas un tableau de données.`);
+      }
+    });
+
+    console.log("📊 Données triées :", this.statistiques);
     this.categorieActive = Object.keys(this.statistiques)[0] || "";
   } catch (error) {
     console.error("❌ Erreur de récupération des statistiques :", error);
   }
 },
+
 
 
 
