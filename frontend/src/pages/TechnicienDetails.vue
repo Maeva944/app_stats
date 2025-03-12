@@ -151,96 +151,163 @@ export default {
 </script>
 
 <style scoped>
+/* 🌍 Conteneur principal */
 .stat-container {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start; /* ✅ Aligne la photo à gauche */
   width: 90%;
-  max-width: 800px;
+  max-width: 900px;
   margin: auto;
-  padding: 20px;
-  background: #1a1a2e;
-  color: white;
+  margin: 5% auto;
+  padding: 20px 20px 20px; /* ✅ Décale sous le header */
+  background: #F8F8F8;
+  color: black;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* 🔹 Informations du technicien */
+/* 📷 Photo du technicien */
+.photo-tech {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #E60F04;
+  margin-right: 20px; /* ✅ Espacement entre la photo et le texte */
+}
+
+/* 🏷️ Informations du technicien */
 .technicien-info {
-  display: block;
-  align-items: center;
-  gap: 15px;
-  padding: 10px;
-  border-bottom: 1px solid #444;
-  width: 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* ✅ Aligne le texte à gauche */
+  text-align: left; /* ✅ Évite le centrage inutile */
 }
 
 .technicien-info h2 {
-  color: #fff;
-  font-size: 25pt;
+  color: #E60F04;
+  font-size: 26px;
+  margin: 5px 0;
+  font-weight: bold;
 }
 
-.photo-tech {
-  width: 50%;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-/* 🔹 Score NPS */
+/* 📊 Score NPS */
 .nps-score {
-  color: orange;
+  color: #FFDC00;
+  font-weight: bold;
 }
 
-/* 🔹 Catégories */
+/* 📆 Sélecteurs Mois / Année */
+label {
+  font-weight: bold;
+  margin: 0 0 0 3%;
+}
+
+select, input {
+  padding: 8px;
+  border: 2px solid #E60F04;
+  border-radius: 5px;
+  outline: none;
+  font-size: 16px;
+}
+
+/* 🔘 Boutons */
+button {
+  background: #E60F04;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #C00D00;
+}
+
+button.toggle-annee {
+  margin-left: 10px;
+}
+
+/* 📂 Catégories */
 .categories {
   display: flex;
-  justify-content: space-around;
-  margin-top: 10px;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .categories button {
   background: #3a3a5e;
   color: white;
   border: none;
-  padding: 10px;
+  padding: 12px;
   border-radius: 5px;
   cursor: pointer;
+  transition: 0.3s ease-in-out;
+  margin: 5px;
+  font-size: 16px;
+  margin-bottom: 3%;
 }
 
-.categories .active {
-  background: orange;
+.categories button.active {
+  background: #FFDC00;
+  color: black;
 }
 
-/* 🔹 Cartes de statistiques */
+/* 📊 Cartes des statistiques */
 .stat-card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* ✅ Cartes plus grandes */
+  gap: 15px;
   margin-top: 20px;
+  text-align: center;
+  width: 90%;
+  max-width: 1100px;
+  margin: auto;
 }
 
 .stat-card {
-  background: #252545;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
+  background: #fff; 
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #E60F04;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
 }
 
 .stat-title {
-  font-size: 14px;
-  color: #ddd;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
+/* 📊 Valeurs */
 .stat-value {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: bold;
 }
 
 .high {
-  color: limegreen;
+  color: #00FF00;
 }
 
 .low {
-  color: red;
+  color: #FF0000;
 }
+
+/* 📌 Texte "Aucune statistique disponible" */
+p {
+  text-align: center;
+  font-size: 18px;
+  font-style: italic;
+  color: #666;
+}
+
 </style>

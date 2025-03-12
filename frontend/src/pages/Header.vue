@@ -5,6 +5,7 @@
     </div>
     <nav class="nav-links">
       <router-link to="/" v-if="isLoggedIn" class="nav-item">Accueil</router-link>
+      <router-link to="/importer" v-if="isLoggedIn" class="nav-item">Importer des Statistiques</router-link>
       <button v-if="isLoggedIn" @click="logout" class="logout-button">Déconnexion</button>
     </nav>
   </header>
@@ -64,7 +65,7 @@ body {
 .nav-links {
   display: flex;
   align-items: center;
-  font-size: 20pt;
+  font-size: 15pt;
 }
 
 /* 🏠 Lien Accueil */

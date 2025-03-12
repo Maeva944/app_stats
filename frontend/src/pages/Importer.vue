@@ -6,6 +6,7 @@
     <select v-model="categorieChoisie" id="categorie">
         <option value="Qualité Techniques">Qualité Techniques</option>
         <option value="NPS">NPS</option>
+        <option value="VAPS">VAPS</option>
         <option value="Proposition">Proposition</option>
         <option value="Prime">Prime</option>
     </select>
@@ -89,9 +90,14 @@ export default {
 
     this.successMessage = "✅ Données importées avec succès !";
     this.selectedFile = null;
+    this.moisChoisi= "";
+    this.categorieChoisie= "";
     this.missingMatricules = data.missing || [];
   }catch (error) {
         this.errorMessage = " Une erreur est survenue.";
+        this.selectedFile = null;
+        this.moisChoisi= "";
+        this.categorieChoisie= "";
       }
     },
   },
@@ -100,60 +106,104 @@ export default {
 
 
 <style scoped>
+/* 🌍 Conteneur principal */
 .import-container {
-  width: 90%;
-  max-width: 500px;
-  margin: 0 auto;
-  text-align: center;
-  padding: 20px;
-  background: white;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border: 2px solid #E60F04;
   border-radius: 10px;
+  padding: 30px;
+  max-width: 500px; /* ✅ Taille ajustée pour bien centrer */
+  margin: 10% auto 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  font-family: Arial, sans-serif;
 }
 
+/* 📌 Titres et labels */
 .import-container h2 {
-  margin-bottom: 15px;
+  color: #E60F04;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+  font-weight: bold;
 }
 
-.import-container input,
-.import-container select {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
+.import-container label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+/* 📌 Champs de formulaire (Select, Input, File) */
+.import-container select,
+.import-container input[type="number"],
+.import-container input[type="file"] {
+  width: 100%; /* ✅ Uniformise la largeur */
+  padding: 12px;
+  border: 2px solid #E60F04;
   border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box; /* ✅ Évite que la taille change */
 }
 
+/* 📌 Spécifique pour l'input file */
+.import-container input[type="file"] {
+  border-style: dashed; /* ✅ Bordure en pointillés */
+  padding: 8px;
+  background: #fff;
+  cursor: pointer;
+  margin-top: 5%;
+}
+
+/* 📌 Bouton */
 .import-container button {
   width: 100%;
-  padding: 10px;
-  background-color: #1F68DE;
-  color: white;
+  padding: 12px;
+  background: #E60F04;
   border: none;
   border-radius: 5px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 16px;
-}
-
-.import-container button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
-}
-
-.error {
-  color: red;
+  transition: background 0.3s ease;
   margin-top: 10px;
-  font-weight: bold;
 }
 
+.import-container button:hover {
+  background: #C00D00;
+}
+
+
+/* ✅ Message de succès */
 .success {
-  color: green;
-  margin-top: 10px;
+  color: #008000;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* ❌ Message d'erreur */
+.error {
+  color: #E60F04;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* 🔴 Liste des matricules manquants */
+ul {
+  padding: 10px;
+  list-style: none;
+  text-align: center;
+}
+
+ul li {
+  background: #FFDC00;
+  color: #333;
+  padding: 5px;
+  margin-top: 5px;
+  border-radius: 5px;
   font-weight: bold;
 }
 
-ul {
-  text-align: left;
-  margin-top: 10px;
-}
 </style>

@@ -60,56 +60,99 @@ export default {
 };
 </script>
 <style scoped>
-body {
-  background-color: #eeecec;
-}
-h1 {
-  color: #333;
-}
+/* 🌍 Conteneur principal */
 .login-container {
-  max-width: 290px;
-  margin: auto;
+  background: #fff;
+  border: 2px solid #E60F04;
+  border-radius: 10px;
+  padding: 30px;
+  max-width: 400px;
+  margin: 100px auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   text-align: center;
-  padding: 15%;
-  margin-top: 15%;
-  background-color: #f4f1f1;
+  font-family: Arial, sans-serif;
 }
+
+/* 🏷️ Titre */
+.login-container h1 {
+  color: #E60F04;
+  font-size: 26px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+/* 📌 Champs de formulaire */
 .login-container input {
-  display: block;
   width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
+  padding: 12px;
+  border: 2px solid #E60F04;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+  margin-bottom: 15px;
 }
-#login-button {
-  min-width: 106%;
-  padding: 10px;
-  background: #1F68DE;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-.login-container .password-container {
+
+/* 📌 Mot de passe avec bouton afficher/masquer */
+.password-container {
   display: flex;
   align-items: center;
-  position: relative;
-  width: 107.5%;
+  width: 100%;
 }
-.login-container .password-container input {
+
+/* 📌 Champ mot de passe */
+.password-container input {
   flex: 1;
-}
-.login-container .toggle-password {
-  background: none;
-  border: none;
-  cursor: pointer;
-  position: absolute;
-  right: -1px;
-  top: 8px;
+  padding: 12px;
+  border: 2px solid #E60F04;
+  border-radius: 5px;
   font-size: 16px;
-  color: #1F68DE;
-  width: 25%;
+  box-sizing: border-box;
 }
+
+/* 👁️ Bouton "Afficher/Masquer" bien aligné */
+.toggle-password {
+  background: #FFDC00;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin: 0 0 4% 2%; /* ✅ Évite que le bouton touche l'input */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password:hover {
+  background: #E6C500;
+}
+
+/* 🔴 Bouton Connexion */
+#login-button {
+  width: 100%;
+  padding: 12px;
+  background: #E60F04;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#login-button:hover {
+  background: #C00D00;
+}
+
+/* ❌ Message d'erreur */
 .error {
-  color: red;
+  color: #E60F04;
+  font-weight: bold;
+  margin-top: 15px;
 }
+
   </style>
   
