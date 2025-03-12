@@ -125,7 +125,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                         item.matricule,
                         item.categorie,
                         item.donnee,
-                        item.mois ? parseInt(item.mois, 10) : null, // ✅ Stocke correctement `mois`
+                        item.mois ? parseInt(item.mois, 10) : null,
                         item.annee
                     ]
                 )

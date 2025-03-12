@@ -150,7 +150,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .stat-container {
   display: flex;
   flex-wrap: wrap;

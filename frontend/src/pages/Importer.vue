@@ -99,7 +99,7 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 .import-container {
   width: 90%;
   max-width: 500px;

@@ -76,72 +76,106 @@ export default {
   };
 </script>
 
-<style>
-/* Conteneur de recherche */
+<style scoped>
+/* 🌍 Conteneur principal */
 .search-container {
   position: relative;
-  max-width: 400px;
+  max-width: 500px;
   margin: auto;
-  padding: 10% 0;
+  margin-top: 10%;
+  padding-top: 80px; /* ✅ Ajusté pour éviter qu’il touche le header */
+  text-align: center;
 }
 
-/* Barre de recherche */
+/* 🔍 Titre */
+h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #E60F04; /* ✅ Rouge entreprise */
+  margin-bottom: 20px;
+}
+
+/* 📝 Barre de recherche */
+.search-bar {
+  position: relative;
+  width: 100%;
+}
+
 .search-bar input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 12px;
+  border: 2px solid #FFDC00; /* ✅ Bordure jaune plus sobre */
+  border-radius: 25px;
   font-size: 16px;
+  outline: none;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  background: white;
+  color: black;
+  box-shadow: none; /* ✅ Suppression de l'ombre rouge */
 }
 
-/* Boîte de suggestions */
+/* Effet au focus */
+.search-bar input:focus {
+  border-color: #E60F04;
+  box-shadow: 0px 2px 8px rgba(255, 0, 0, 0.3); /* ✅ Ombre plus douce */
+}
+
+/* 📜 Boîte de suggestions */
 .suggestions-box {
   position: absolute;
   top: 100%;
-  width: 100%;
+  width: 105%;
   background: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
   z-index: 1000;
+  overflow: hidden;
+  margin-top: 5px;
 }
 
-/* Liste des suggestions */
+/* ✅ Liste des suggestions */
 .suggestions-box ul {
   list-style: none;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
 .suggestions-box li {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 12px;
   cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s ease-in-out;
+  color: black;
+  border-bottom: 1px solid #ddd;
 }
 
 .suggestions-box li:hover {
-  background: #f0f0f0;
+  background: #FFDC00; /* ✅ Jaune au hover */
+  color: #E60F04;
 }
 
-/* Message "Aucun technicien trouvé" */
+/* 🚫 Correction du message "Aucun technicien trouvé" */
 .no-results {
-  padding: 10px;
+  padding: 12px;
   text-align: center;
-  color: #777;
+  color: #666; /* ✅ Gris foncé au lieu de rouge vif */
   font-style: italic;
+  background: #f8f8f8; /* ✅ Fond légèrement gris */
+  border-radius: 10px;
+  width: fit-content;
+  margin: 10px auto;
 }
 
-/* Image du technicien */
+/* 📷 Image du technicien */
 .tech-photo {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   margin-right: 10px;
+  border: 2px solid #E60F04;
 }
+
 </style>
-
-
-
-  
-  

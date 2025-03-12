@@ -109,7 +109,7 @@ methods: {
 };
 </script>
 
-<style>
+<style scoped>
 .container-mdp {
   width: 90%;
   max-width: 400px;

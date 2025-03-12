@@ -1,12 +1,13 @@
 <template>
-    <header>
-        <h1>VDE Tech</h1>
-      <nav>
-        <router-link to="/" id="home" v-if="isLoggedIn">Accueil</router-link>
-        <!--<router-link to="/profil">Profil</router-link>-->
-        <button v-if="isLoggedIn" @click="logout">Déconnexion</button>
-      </nav>
-    </header>
+  <header class="header">
+    <div class="logo">
+      <h1>VDE Tech</h1>
+    </div>
+    <nav class="nav-links">
+      <router-link to="/" v-if="isLoggedIn" class="nav-item">Accueil</router-link>
+      <button v-if="isLoggedIn" @click="logout" class="logout-button">Déconnexion</button>
+    </nav>
+  </header>
 </template>
   
 <script>
@@ -32,37 +33,69 @@
 </script>
   
 <style scoped>
-header{
-    display: flex;
-    justify-content: space-between;
-    color: #E60F04;
-    padding: 5%;
+/* 📌 Conteneur du header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #E60F04;  /* 🔥 Rouge principal */
+  color: white;
+  padding: 15px 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  position: fixed;  
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
 }
-h1{
-    width: 50%;
-}
-  nav {
-  padding: 10px;
-  width: 60%;
-  position : fixe;
-  right: 0;
-  text-align:right;
 
+body {
+  padding-top: 70px; /* Ajuste en fonction de la hauteur du header */
 }
-button {
-    background: #E60F04;
-    color: white;
-    border: none;
-    padding: 3% 1%;
-    cursor: pointer;
-    width: 50%;
-    margin-left: 5%;
-    font-size: 12pt;
+
+/* 🏷️ Logo */
+.logo h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
 }
-#home{
-    text-decoration:none;
-    font-size:15pt;
-    color: #333333;
+
+/* 🔗 Navigation */
+.nav-links {
+  display: flex;
+  align-items: center;
+  font-size: 20pt;
+}
+
+/* 🏠 Lien Accueil */
+.nav-item {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  margin-right: 20px;
+  transition: color 0.3s ease;
+}
+
+.nav-item:hover {
+  color: #FFDC00;  /* 🌟 Passe en jaune au survol */
+}
+
+/* 🔘 Bouton Déconnexion */
+.logout-button {
+  background: #FFDC00;
+  color: #E60F04;
+  font-weight: bold;
+  border: none;
+  padding: 10px 15px;
+  margin-right: 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.logout-button:hover {
+  background: white;
+  color: #E60F04;
 }
 </style>
   
