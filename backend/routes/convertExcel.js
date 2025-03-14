@@ -116,22 +116,39 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         console.log("📊 Données JSONB à insérer :", data);
 
         await Promise.all(
-            data.map(item =>
-                pool.query(
-                    `INSERT INTO Statistiques (technicien_id, matricule, categorie, donnee, mois_id, annee) 
-                     VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
-                    [
-                        item.technicien_id,
-                        item.matricule,
-                        item.categorie,
-                        item.donnee,
-                        item.mois ? parseInt(item.mois, 10) : null,
-                        item.annee
-                    ]
-                )
-            )
+            data.map(async (item) => {
+                if (!item.mois) {
+                    // 🔹 Cas de l'importation annuelle → Écraser les anciennes données
+                    await pool.query(
+                        `INSERT INTO Statistiques (technicien_id, matricule, categorie, donnee, mois_id, annee) 
+                        VALUES ($1, $2, $3, $4::jsonb, NULL, $5)
+                        ON CONFLICT (technicien_id, categorie, annee)
+                        DO UPDATE SET donnee = EXCLUDED.donnee`,
+                        [
+                            item.technicien_id,
+                            item.matricule,
+                            item.categorie,
+                            item.donnee,
+                            item.annee
+                        ]
+                    );
+                } else {
+                    // 🔹 Cas de l'importation mensuelle → Pas d'écrasement
+                    await pool.query(
+                        `INSERT INTO Statistiques (technicien_id, matricule, categorie, donnee, mois_id, annee) 
+                         VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
+                        [
+                            item.technicien_id,
+                            item.matricule,
+                            item.categorie,
+                            item.donnee,
+                            parseInt(item.mois, 10),
+                            item.annee
+                        ]
+                    );
+                }
+            })
         );
-        
 
         console.log("💾 Nombre de lignes insérées :", data.length);
         res.json({ message: "Données JSONB insérées avec succès !" });
