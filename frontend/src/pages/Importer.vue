@@ -61,12 +61,17 @@ export default {
     return {
       moisDisponibles: [],
       moisChoisi: "",
+      anneeChoisieComConso: new Date().getFullYear(),
       anneeChoisie: new Date().getFullYear(),
       selectedFile: null,
+      selectFileComConso: null,
       errorMessage: "", 
-      successMessage: "", 
+      successMessage: "",
+      errorMessageComConso: "", 
+      successMessageComConso: "", 
       missingMatricules: [],
       categorieChoisie: "",
+      categorieChoisieComConso: "",
     };
   },
   async created() {
@@ -102,7 +107,7 @@ export default {
   try {
     const data = await postFormData("/convert/upload", formData);
 
-    this.successMessage = "✅ Données importées avec succès !";
+    this.successMessage = "Données importées avec succès !";
     this.selectedFile = null;
     this.moisChoisi= "";
     this.categorieChoisie= "";
@@ -112,8 +117,42 @@ export default {
         this.selectedFile = null;
         this.moisChoisi= "";
         this.categorieChoisie= "";
+        console.log(error);
       }
     },
+    handleFileUploadComConso(event) {
+      this.selectFileComConso = event.target.files[0];
+      this.errorMessageComConso = "";
+      this.successMessageComConso = "";
+      this.missingMatricules = [];
+    },
+    async uploadFileComConso(){
+      if(!this.selectFileComConso){
+        this.errorMessageComConso="Veuillez sélectionner un fichier.";
+        return;
+      }
+
+      const FormDataTwo = new FormData();
+      FormDataTwo.append("file", this.selectFileComConso);
+      FormDataTwo.append("anneeTwo", this.anneeChoisieComConso);
+      FormDataTwo.append("categorieTwo", this.categorieChoisieComConso);
+      
+      console.log("📤 FormData envoyé :", [...FormDataTwo.entries()]); 
+
+      try{
+        const data = await postFormData("/converttwo/upload-comconso", FormDataTwo);
+        this.successMessageComConso = "Données importées avec succès !";
+        this.selectFileComConso = null;
+        this.categorieChoisieComConso= "";
+        this.missingMatricules = data.missing || [];
+
+      }catch(error){
+        this.errorMessageComConso = " Une erreur est survenue.";
+        console.log(error);
+        this.selectFileComConso = null;
+        this.categorieChoisieComConso= "";
+      }
+    }
   },
 };
 </script>

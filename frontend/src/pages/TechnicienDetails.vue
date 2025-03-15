@@ -48,6 +48,21 @@
   </div>
 
   <p v-else>Aucune statistique disponible</p>
+  <div v-if="categorieActive === 'NPS'">
+    <h3>📢 Avis clients</h3>
+    <ul v-if="Array.isArray(commentaires) && commentaires.length > 0">
+
+      <li v-for="(commentaire, index) in commentaires" :key="index" class="commentaire-item">
+        <strong>Produit :</strong> {{ commentaire.produit }} <br>
+        <strong>Avis :</strong> {{ commentaire.avis }} <br>
+        <strong>Suggestion :</strong> {{ commentaire.suggestion }} <br>
+        <strong>Score NPS :</strong> {{ commentaire.nps_score }} <br>
+        <strong>Date :</strong> {{ formatDate(commentaire.job_date) }}
+      </li>
+    </ul>
+    <p v-else>Aucun avis disponible</p>
+</div>
+
 </template>
 
 <script>
@@ -62,16 +77,35 @@ export default {
       statistiques: {},
       categorieActive: "",
       defaultPhoto: "https://via.placeholder.com/100",
-      aLAnnee: false, 
+      aLAnnee: false,
+      commentaires: [], 
     };
   },
   async created(){
     await this.fetchMois();
     await this.fetchTechnicien();
     await this.fetchStatistiques();
+    await this.fetchCommentaires();
   },
   
   methods: {
+    async fetchCommentaires() {
+  const id = this.$route.params.id;
+  if (!id) return;
+
+  let endpoint = `/commentaires/${id}?annee=${this.anneeChoisie}`;
+  
+  if (!this.aLAnnee && this.moisChoisi) {
+    endpoint += `&mois_id=${this.moisChoisi}`;
+  }
+
+  try {
+    this.commentaires = await getData(endpoint);
+    console.log("💬 Commentaires récupérés :", this.commentaires);
+  } catch (error) {
+    console.error("❌ Erreur de récupération des commentaires :", error);
+  }
+},
     async fetchTechnicien() {
     const id = this.$route.params.id; 
     try {
@@ -135,17 +169,22 @@ export default {
     console.error("❌ Erreur de récupération des statistiques :", error);
   }
 },
+updateStats() {
+  this.fetchStatistiques();
+  if (this.categorieActive === "NPS") {
+    this.fetchCommentaires();
+  }
+},
+toggleAnnee() {
+  this.aLAnnee = !this.aLAnnee;
+  this.fetchStatistiques(); // 🔹 Recharge avec ou sans mois
+},
+    formatDate(dateString) {
+    if (!dateString) return "Date inconnue";
 
-
-
-
-    updateStats() {
-      this.fetchStatistiques(); 
-    },
-    toggleAnnee() {
-      this.aLAnnee = !this.aLAnnee;
-      this.fetchStatistiques(); // 🔹 Recharge avec ou sans mois
-    }  
+    const date = new Date(dateString);
+    return date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
+  }
   }
 }
 </script>
@@ -308,6 +347,74 @@ p {
   font-size: 18px;
   font-style: italic;
   color: #666;
+}
+
+/* 📝 Conteneur principal des commentaires */
+.commentaires-container {
+  width: 90%;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  border: 2px solid #E60F04;
+}
+
+/* 🏷️ Titre des commentaires */
+.commentaires-container h3 {
+  font-size: 22px;
+  color: #E60F04;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #E60F04;
+  padding-bottom: 5px;
+}
+
+/* 📌 Liste des commentaires */
+.commentaires-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 🗨️ Carte de commentaire */
+.commentaire-item {
+  background: #f8f8f8;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 5px solid #E60F04;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.commentaire-item:hover {
+  transform: scale(1.02);
+}
+
+/* 📝 Détails du commentaire */
+.commentaire-item strong {
+  color: #333;
+  font-weight: bold;
+}
+
+.commentaire-item p {
+  margin: 5px 0;
+  color: #444;
+  font-size: 16px;
+}
+
+/* ⭐ Score NPS */
+.commentaire-item strong:contains("Score NPS") {
+  color: #FFDC00;
+}
+
+/* 📅 Date */
+.commentaire-item strong:contains("Date") {
+  color: #777;
+  font-style: italic;
 }
 
 </style>

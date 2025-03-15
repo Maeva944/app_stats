@@ -133,10 +133,11 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                         ]
                     );
                 } else {
-                    // 🔹 Cas de l'importation mensuelle → Pas d'écrasement
                     await pool.query(
                         `INSERT INTO Statistiques (technicien_id, matricule, categorie, donnee, mois_id, annee) 
-                         VALUES ($1, $2, $3, $4::jsonb, $5, $6)`,
+                         VALUES ($1, $2, $3, $4::jsonb, $5, $6)
+                         ON CONFLICT (technicien_id, categorie, annee, mois_id) 
+                         DO UPDATE SET donnee = EXCLUDED.donnee`,
                         [
                             item.technicien_id,
                             item.matricule,
@@ -145,7 +146,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                             parseInt(item.mois, 10),
                             item.annee
                         ]
-                    );
+                    );                    
                 }
             })
         );

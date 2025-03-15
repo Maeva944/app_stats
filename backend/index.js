@@ -7,6 +7,8 @@ const passwordRoute = require ("./routes/motdepasse");
 const statsRoute = require("./routes/statistique");
 const converExcel = require("./routes/convertExcel");
 const moisRoute = require("./routes/mois");
+const ConvertComConso = require("./routes/importComConso");
+const Commentaires = require("./routes/commentaires");
 
 
 
@@ -20,6 +22,8 @@ app.use("/password", passwordRoute);
 app.use("/statistiques", statsRoute); 
 app.use("/convert", converExcel);
 app.use("/mois", moisRoute);
+app.use("/converttwo", ConvertComConso)
+app.use("/commentaires", Commentaires)
 
 
 const PORT = process.env.PORT || 3000;
