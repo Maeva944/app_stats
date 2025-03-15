@@ -5,7 +5,7 @@
     <img :src="technicien?.photo || defaultPhoto" alt="Photo du technicien" class="photo-tech" />
     <div class="technicien-info">
       <h2>{{ technicien?.nom }} {{ technicien?.prenom }}</h2>
-      <p>Technicien Vitrage Expert</p>
+      <p>{{ technicien?.metier }}</p>
       <p><span class="nps-score">NPS :</span> <strong>{{ technicien?.nps || "N/A" }}</strong></p>
     </div>
   </div>

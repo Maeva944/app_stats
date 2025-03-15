@@ -19,10 +19,15 @@ router.get('/techniciendetail/:id', async (req, res) => {
     try {
         // 🔹 Récupérer les infos du technicien
         const technicienResult = await pool.query(
-            "SELECT * FROM Technicien WHERE id = $1",
+            `SELECT technicien.*, metiers.nom AS metier 
+            FROM technicien 
+            JOIN users ON technicien.matricule = users.technicien_matricule 
+            JOIN metiers ON users.metier_id = metiers.id
+            WHERE technicien.id = $1;`,
             [id]
         );
-
+        
+        
         if (technicienResult.rows.length === 0) {
             return res.status(404).json({ error: "Technicien non trouvé" });
         }
