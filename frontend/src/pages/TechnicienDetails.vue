@@ -25,16 +25,19 @@
     </button>
 
   <!-- 🔹 Affichage des catégories si elles existent -->
-  <div v-if="Object.keys(statistiques).length > 0" class="categories">
-    <button
-      v-for="(stat, key) in statistiques"
-      :key="key"
-      @click="categorieActive = key"
-      :class="{ active: categorieActive === key }"
-    >
-      {{ key }}
-    </button>
-  </div>
+  <div class="categories">
+  <button
+    v-for="categorie in categories"
+    @change="updateStats"
+    :key="categorie.id"
+    @click="categorieActive = categorie.id"
+    :class="{ active: categorieActive === categorie.id }"
+  >
+    {{ categorie.nom }}
+  </button>
+</div>
+
+
 
   <!-- 🔹 Affichage des statistiques par catégorie -->
   <div v-if="statistiques[categorieActive]" class="stat-card-container">
@@ -48,10 +51,9 @@
   </div>
 
   <p v-else>Aucune statistique disponible</p>
-  <div v-if="categorieActive === 'NPS'">
+  <div v-if="categorieActive === 1">
     <h3>📢 Avis clients</h3>
     <ul v-if="Array.isArray(commentaires) && commentaires.length > 0">
-
       <li v-for="(commentaire, index) in commentaires" :key="index" class="commentaire-item">
         <strong>Produit :</strong> {{ commentaire.produit }} <br>
         <strong>Avis :</strong> {{ commentaire.avis }} <br>
@@ -62,6 +64,8 @@
     </ul>
     <p v-else>Aucun avis disponible</p>
 </div>
+
+
 
 </template>
 
@@ -75,7 +79,8 @@ export default {
       anneeChoisie: new Date().getFullYear(),
       technicien: null,
       statistiques: {},
-      categorieActive: "",
+      categorieActive: 1,
+      categories: [],
       defaultPhoto: "https://via.placeholder.com/100",
       aLAnnee: false,
       commentaires: [], 
@@ -86,9 +91,18 @@ export default {
     await this.fetchTechnicien();
     await this.fetchStatistiques();
     await this.fetchCommentaires();
+    await this.fetchCategories();
   },
   
   methods: {
+    async fetchCategories() {
+  try {
+    this.categories = await getData("/categories"); // 🔥 Appelle la nouvelle route API
+    console.log("📌 Catégories récupérées :", this.categories);
+  } catch (error) {
+    console.error("❌ Erreur de récupération des catégories :", error);
+  }
+  },
     async fetchCommentaires() {
     this.commentaires= [];
     const id = this.$route.params.id;
@@ -101,6 +115,7 @@ export default {
   }
 
   console.log(`🔎 Requête envoyée : ${endpoint}`)
+  console.log("📊 Statistiques mises à jour :", this.statistiques);
 
   try {
     this.commentaires = await getData(endpoint);
@@ -135,52 +150,58 @@ export default {
   }
   },
   async fetchStatistiques() {
-  const id = this.$route.params.id;
-  if (!id) return;
+    const id = this.$route.params.id;
+    if (!id) return;
 
-  let endpoint = `/statistiques/${id}?annee=${this.anneeChoisie}&aLAnnee=${this.aLAnnee}`;
-  
-  if (!this.aLAnnee && this.moisChoisi) {
-    endpoint += `&mois_id=${this.moisChoisi}`;
-  }
+    let endpoint = `/statistiques/${id}?annee=${this.anneeChoisie}&categorie_id=${this.categorieActive}`;
 
-  try {
-    // 🔹 Récupération des statistiques
-    this.statistiques = await getData(endpoint);
-    
-    // 🔹 Trier les sous-catégories dans chaque catégorie
-    Object.keys(this.statistiques).forEach(categorie => {
-      if (Array.isArray(this.statistiques[categorie].data)) { 
-        this.statistiques[categorie].data.sort((a, b) => {
-          const keyA = a.sous_categorie.toLowerCase();
-          const keyB = b.sous_categorie.toLowerCase();
-          const isGlobalA = keyA.includes("global");
-          const isGlobalB = keyB.includes("global");
+    if (!this.aLAnnee && this.moisChoisi) {
+        endpoint += `&mois_id=${this.moisChoisi}`;
+    }
 
-          if (isGlobalA && !isGlobalB) return 1; 
-          if (!isGlobalA && isGlobalB) return -1; 
-          return 0;
+    // 🔥 Ajout du paramètre "aLAnnee"
+    endpoint += `&aLAnnee=${this.aLAnnee}`;
+
+    console.log(`📡 Requête envoyée à l'API : ${endpoint}`);
+
+    try {
+        const statsData = await getData(endpoint);
+        console.log("📊 Données reçues de l'API :", statsData);
+
+        // Vérifier que les stats sont bien un objet
+        if (!statsData || typeof statsData !== "object") {
+            console.error("❌ Données statistiques incorrectes :", statsData);
+            return;
+        }
+
+        let statistiquesTransformees = {};
+
+        // 🔹 Initialiser chaque catégorie, même si elle n'a pas encore de données
+        this.categories.forEach((categorie) => {
+            statistiquesTransformees[categorie.id] = {
+                mois: null,
+                annee: this.anneeChoisie,
+                data: []
+            };
         });
-      } else {
-        console.warn(`⚠️ La catégorie "${categorie}" ne contient pas un tableau de données.`);
-      }
-    });
 
-    console.log("📊 Données triées :", this.statistiques);
-    this.categorieActive = Object.keys(this.statistiques)[0] || "";
-  } catch (error) {
-    console.error("❌ Erreur de récupération des statistiques :", error);
-  }
-},
-updateStats() {
-    console.log("🔄 Mise à jour des stats et commentaires...");
+        // 🔹 Remplir les catégories avec leurs statistiques existantes
+        Object.keys(statsData).forEach((categorie) => {
+            const { mois, annee, data } = statsData[categorie];
 
-    this.fetchStatistiques();
-    
-    console.log("📡 Vérification du NPS...");
-    if (this.categorieActive === "NPS") {
-        console.log(`📩 Nouvelle requête pour commentaires → mois: ${this.moisChoisi}, année: ${this.anneeChoisie}`);
-        this.fetchCommentaires(); // 🔥 Assure-toi qu'elle est bien appelée ici !
+            statistiquesTransformees[categorie] = {
+                mois: mois || null,
+                annee: annee,
+                data: Array.isArray(data) ? data : []
+            };
+        });
+
+        this.statistiques = statistiquesTransformees;
+        console.log("📊 Données finales à afficher :", this.statistiques);
+        this.categorieActive = Object.keys(this.statistiques)[0] || "";
+
+    } catch (error) {
+        console.error("❌ Erreur de récupération des statistiques :", error);
     }
 },
 toggleAnnee() {
@@ -189,7 +210,11 @@ toggleAnnee() {
   this.fetchStatistiques();
   this.fetchCommentaires();
 },
-    formatDate(dateString) {
+updateStats(){
+  this.fetchCommentaires();
+  this.fetchStatistiques();
+},
+formatDate(dateString) {
     if (!dateString) return "Date inconnue";
 
     const date = new Date(dateString);

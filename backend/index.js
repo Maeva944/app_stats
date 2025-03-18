@@ -9,6 +9,8 @@ const converExcel = require("./routes/convertExcel");
 const moisRoute = require("./routes/mois");
 const ConvertComConso = require("./routes/importComConso");
 const Commentaires = require("./routes/commentaires");
+const CategoriesRoute = require("./routes/categorie");
+
 
 
 
@@ -22,6 +24,7 @@ app.use("/password", passwordRoute);
 app.use("/statistiques", statsRoute); 
 app.use("/convert", converExcel);
 app.use("/mois", moisRoute);
+app.use("/categories", CategoriesRoute);
 app.use("/converttwo", ConvertComConso)
 app.use("/commentaires", Commentaires)
 

@@ -17,18 +17,12 @@ function extractMatricule(value, rowNumber){
 
 
 router.post("/upload", upload.single("file"), async (req, res) => {
-    console.log("📩 Requête reçue !");
-    console.log("✅ req.mois :", req.body);
-    console.log("✅ req.file :", req.file ? req.file.originalname : "Aucun fichier reçu");
+   
     try{
         if(!req.body.categorie  || !req.body.annee || !req.file ){
             return res.status(400).json({ error : "La catégorie, Le fichiers et l'année son requis."})
         }
-        console.log("📤 Mois reçu :", req.body.mois);
-        console.log("📤 Année reçue :", req.body.annee);
-        console.log("📤 catégorie reçue :", req.body.categorie);
 
-        
         const annee = parseInt(req.body.annee, 10);
 
         let mois = req.body.mois;
@@ -42,7 +36,17 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         let SousCategorie = [];
         let matricules = new Set();
         let data = [];
-        let categorie = "";
+        let categorie = req.body.categorie;
+
+        const categorieResult = await pool.query(
+            "SELECT id FROM categories WHERE id = $1",
+            [categorie]
+        );
+        if (categorieResult.rows.length === 0) {
+            throw new Error(`❌ Catégorie inconnue : ${categorie}`);
+        }
+        const categorie_id = categorieResult.rows[0].id;
+        
         
         if (workbook.worksheets[0]) {
             categorie = req.body.categorie;
@@ -107,7 +111,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                 technicien_id: technicienId,
                 matricule,
                 donnee: JSON.stringify(donnee),
-                categorie,
+                categorie_id,
                 mois: parseInt(mois, 10),
                 annee: annee
             });
@@ -120,28 +124,28 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                 if (!item.mois) {
                     // 🔹 Cas de l'importation annuelle → Écraser les anciennes données
                     await pool.query(
-                        `INSERT INTO Statistiques (technicien_id, matricule, categorie, donnee, mois_id, annee) 
+                        `INSERT INTO Statistiques (technicien_id, matricule, categorie_id, donnee, mois_id, annee) 
                         VALUES ($1, $2, $3, $4::jsonb, NULL, $5)
-                        ON CONFLICT (technicien_id, categorie, annee)
+                        ON CONFLICT (technicien_id, categorie_id, annee)
                         DO UPDATE SET donnee = EXCLUDED.donnee`,
                         [
                             item.technicien_id,
                             item.matricule,
-                            item.categorie,
+                            item.categorie_id,
                             item.donnee,
                             item.annee
                         ]
                     );
                 } else {
                     await pool.query(
-                        `INSERT INTO Statistiques (technicien_id, matricule, categorie, donnee, mois_id, annee) 
+                        `INSERT INTO Statistiques (technicien_id, matricule, categorie_id, donnee, mois_id, annee) 
                          VALUES ($1, $2, $3, $4::jsonb, $5, $6)
-                         ON CONFLICT (technicien_id, categorie, annee, mois_id) 
+                         ON CONFLICT (technicien_id, categorie_id, annee, mois_id) 
                          DO UPDATE SET donnee = EXCLUDED.donnee`,
                         [
                             item.technicien_id,
                             item.matricule,
-                            item.categorie,
+                            item.categorie_id,
                             item.donnee,
                             parseInt(item.mois, 10),
                             item.annee

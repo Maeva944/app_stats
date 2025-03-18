@@ -6,8 +6,8 @@ const router = express.Router();
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    let { mois_id, annee, aLAnnee  } = req.query; // Mois et année passés en paramètre de requête
-    console.log("ID:", id, "Mois:", mois_id, "Année:", annee, "À l'année:", aLAnnee); 
+    let { mois_id, annee, aLAnnee, categorie_id  } = req.query; // Mois et année passés en paramètre de requête
+    console.log("ID:", id, "Mois:", mois_id, "Année:", annee, "À l'année:", aLAnnee, "categorie:", categorie_id); 
     // 🔹 Vérifier si le technicien existe
     const checkTechnicien = await pool.query("SELECT * FROM Technicien WHERE id = $1", [id]);
     if (checkTechnicien.rows.length === 0) {
@@ -27,6 +27,7 @@ router.get("/:id", async (req, res) => {
     if (isNaN(mois_id) || mois_id < 1 || mois_id > 12 || isNaN(annee)) {
       return res.status(400).json({ error: "Mois ou année invalide." });
     }
+    categorie_id = categorie_id ? parseInt(categorie_id, 10) : null;
 
     let query;
     let params;
@@ -35,44 +36,62 @@ router.get("/:id", async (req, res) => {
 
     if (aLAnnee === "true") {
       result = await pool.query(
-        `SELECT categorie, donnee, annee 
-         FROM Statistiques 
-         WHERE technicien_id = $1 AND mois_id IS NULL AND annee = $2`, 
-        [id, annee]
+        `SELECT 
+          s.technicien_id,  
+          s.categorie_id, 
+          c.nom AS categorie_nom, 
+          s.donnee, 
+          s.mois_id, 
+          s.annee
+        FROM Statistiques s
+        JOIN Categories c ON s.categorie_id = c.id
+        WHERE s.technicien_id = $1
+        AND s.annee = $2
+        AND s.categorie_id = $3`, // 🛠️ Ajout du filtre par catégorie_id
+        [id, annee, categorie_id] // 🛠️ Assurer qu'on passe bien les 3 paramètres
       );
     } else {
       result = await pool.query(
-        `SELECT categorie, donnee, mois_id, annee 
-         FROM Statistiques 
-         WHERE technicien_id = $1 AND mois_id = $2 AND annee = $3`, 
-        [id, mois_id, annee]
+        `SELECT 
+          s.technicien_id, 
+          s.categorie_id, 
+          s.donnee, 
+          s.mois_id, 
+          s.annee 
+        FROM Statistiques s
+        WHERE s.technicien_id = $1 
+        AND s.mois_id = $2 
+        AND s.annee = $3 
+        AND s.categorie_id = $4`, 
+        [id, mois_id, annee, categorie_id]
       );
     }
+    
     
     console.log("🛠 Requête SQL générée :", query);
     console.log("📊 Paramètres SQL envoyés :", params);
     console.log("📊 Résultats SQL :", result.rows);
 
-      let statistiquesTransformees = {};
-
-      result.rows.forEach(stat => {
-        const {categorie, donnee, mois_id, annee } = stat;
-
-        if (!statistiquesTransformees[categorie]) {
-          statistiquesTransformees[categorie] = {
-            mois: mois_id || null,
-            annee: annee,
-            data : []
-          };
+    let statistiquesTransformees = {};
+    result.rows.forEach(stat => {
+        const { categorie_id, donnee, mois_id, annee } = stat;
+    
+        if (!statistiquesTransformees[categorie_id]) { // ❌ categorie_id est undefined ici !
+            statistiquesTransformees[categorie_id] = {
+                mois: mois_id || null,
+                annee: annee,
+                data: []
+            };
         }
-        console.log(`📂 Catégorie : ${categorie} (Mois: ${mois_id}, Année: ${annee})`);
+    
         Object.entries(donnee).forEach(([sousCategorie, valeur]) => {
-          statistiquesTransformees[categorie].data.push({
-            sous_categorie: sousCategorie.trim(),
-            valeur: parseFloat(valeur) * 100 // Conversion en pourcentage
-          });
+            statistiquesTransformees[categorie_id].data.push({
+                sous_categorie: sousCategorie.trim(),
+                valeur: parseFloat(valeur) * 100
+            });
         });
-      });
+    });
+    
       console.log("📤 Envoi de la réponse...");
       res.json(statistiquesTransformees);
       console.log("✅ Réponse envoyée !");
@@ -84,5 +103,7 @@ router.get("/:id", async (req, res) => {
 });
 
 module.exports = router;
+
+
 
 

@@ -5,12 +5,11 @@
       <h2>Importer des Statistiques</h2>
       <label for="categorie">Veuillez choisir une catégorie :</label>
       <select v-model="categorieChoisie" id="categorie">
-        <option value="Qualité Techniques">Qualité Techniques</option>
-        <option value="NPS">NPS</option>
-        <option value="VAPS">VAPS</option>
-        <option value="Proposition">Proposition</option>
-        <option value="Prime">Prime</option>
-      </select>
+      <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
+        {{ categorie.nom }}
+      </option>
+</select>
+
 
       <label for="mois">Mois :</label>
       <select v-model="moisChoisi" id="mois">
@@ -70,14 +69,24 @@ export default {
       errorMessageComConso: "", 
       successMessageComConso: "", 
       missingMatricules: [],
+      categories: [],
       categorieChoisie: "",
       categorieChoisieComConso: "",
     };
   },
   async created() {
     await this.fetchMois();
+    await this.fetchCategories();
   },
   methods: {
+    async fetchCategories() {
+    try {
+      this.categories = await getData("/categories");
+      console.log("📌 Catégories chargées :", this.categories);
+    } catch (error) {
+      console.error("❌ Erreur de récupération des catégories :", error);
+    }
+    },
     async fetchMois() {
     try {
       this.moisDisponibles = await getData("/mois");
