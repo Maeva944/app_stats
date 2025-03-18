@@ -177,7 +177,8 @@ updateStats() {
 },
 toggleAnnee() {
   this.aLAnnee = !this.aLAnnee;
-  this.fetchStatistiques(); // 🔹 Recharge avec ou sans mois
+  this.fetchStatistiques();
+  this.fetchCommentaires();
 },
     formatDate(dateString) {
     if (!dateString) return "Date inconnue";
