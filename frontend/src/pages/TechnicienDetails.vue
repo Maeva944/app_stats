@@ -90,14 +90,17 @@ export default {
   
   methods: {
     async fetchCommentaires() {
-  const id = this.$route.params.id;
-  if (!id) return;
+    this.commentaires= [];
+    const id = this.$route.params.id;
+    if (!id) return;
 
   let endpoint = `/commentaires/${id}?annee=${this.anneeChoisie}`;
   
   if (!this.aLAnnee && this.moisChoisi) {
     endpoint += `&mois_id=${this.moisChoisi}`;
   }
+
+  console.log(`🔎 Requête envoyée : ${endpoint}`)
 
   try {
     this.commentaires = await getData(endpoint);
@@ -170,12 +173,18 @@ export default {
   }
 },
 updateStats() {
-  this.fetchStatistiques();
-  if (this.categorieActive === "NPS") {
-    this.fetchCommentaires();
-  }
+    console.log("🔄 Mise à jour des stats et commentaires...");
+
+    this.fetchStatistiques();
+    
+    console.log("📡 Vérification du NPS...");
+    if (this.categorieActive === "NPS") {
+        console.log(`📩 Nouvelle requête pour commentaires → mois: ${this.moisChoisi}, année: ${this.anneeChoisie}`);
+        this.fetchCommentaires(); // 🔥 Assure-toi qu'elle est bien appelée ici !
+    }
 },
 toggleAnnee() {
+  console.log("🔄 Changement d'affichage (Année/Mois)");
   this.aLAnnee = !this.aLAnnee;
   this.fetchStatistiques();
   this.fetchCommentaires();
@@ -186,7 +195,22 @@ toggleAnnee() {
     const date = new Date(dateString);
     return date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
   }
-  }
+  },
+  watch: {
+    moisChoisi(newMois, oldMois) {
+        console.log(`📅 Changement de mois : ${oldMois} → ${newMois}`);
+        if (this.categorieActive === "NPS") {
+            this.fetchCommentaires();
+        }
+    },
+    anneeChoisie(newAnnee, oldAnnee) {
+        console.log(`📅 Changement d'année : ${oldAnnee} → ${newAnnee}`);
+        if (this.categorieActive === "NPS") {
+            this.fetchCommentaires();
+        }
+    }
+}
+
 }
 </script>
 
@@ -355,7 +379,7 @@ p {
   width: 90%;
   max-width: 900px;
   margin: 40px auto;
-  padding: 20px;
+  padding: 10%;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
@@ -376,7 +400,7 @@ p {
 /* 📌 Liste des commentaires */
 .commentaires-container ul {
   list-style: none;
-  padding: 0;
+  padding: 5%;
   margin: 0;
 }
 
