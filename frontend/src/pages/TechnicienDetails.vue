@@ -2,7 +2,7 @@
   <p>ID du technicien : {{ $route.params.id }}</p>
 
   <div class="stat-container">
-    <img :src="technicien?.photo ? `/photo/${technicien.photo}` : defaultPhoto alt="Photo du technicien" class="photo-tech" />
+    <img :src="technicien?.photo" alt="Photo du technicien" class="photo-tech" />
     <div class="technicien-info">
       <h2>{{ technicien?.nom }} {{ technicien?.prenom }}</h2>
       <p>{{ technicien?.metier }}</p>
@@ -51,8 +51,8 @@
   </div>
 
   <p v-else>Aucune statistique disponible</p>
-  <div v-if="categorieActive === 1">
-    <h3>📢 Avis clients</h3>
+  <div v-if="categorieActive === 1" class="commentaires-container">
+    <h3>Avis clients</h3>
     <ul v-if="Array.isArray(commentaires) && commentaires.length > 0">
       <li v-for="(commentaire, index) in commentaires" :key="index" class="commentaire-item">
         <strong>Produit :</strong> {{ commentaire.produit }} <br>
@@ -404,7 +404,7 @@ p {
   width: 90%;
   max-width: 900px;
   margin: 40px auto;
-  padding: 10%;
+  padding: 5% 3%;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
@@ -413,7 +413,7 @@ p {
 
 /* 🏷️ Titre des commentaires */
 .commentaires-container h3 {
-  font-size: 22px;
+  font-size: 40px;
   color: #E60F04;
   font-weight: bold;
   text-align: left;
@@ -424,24 +424,21 @@ p {
 
 /* 📌 Liste des commentaires */
 .commentaires-container ul {
-  list-style: none;
   padding: 5%;
   margin: 0;
 }
 
+
 /* 🗨️ Carte de commentaire */
 .commentaire-item {
+  list-style: none;
   background: #f8f8f8;
   padding: 15px;
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin: 2% 1%;
   border-left: 5px solid #E60F04;
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
-}
-
-.commentaire-item:hover {
-  transform: scale(1.02);
 }
 
 /* 📝 Détails du commentaire */
