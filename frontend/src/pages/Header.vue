@@ -1,11 +1,14 @@
 <template>
   <header class="header">
     <div class="logo">
-      <h1>VDE Tech</h1>
+      <h1>
+        <router-link to="/" v-if="isLoggedIn" class="nav-item">VDE Tech</router-link>
+      </h1>
     </div>
     <nav class="nav-links">
       <router-link to="/" v-if="isLoggedIn" class="nav-item">Accueil</router-link>
       <router-link to="/importer" v-if="isLoggedIn" class="nav-item">Importer des Statistiques</router-link>
+      <router-link to="/ajouteremploye" v-if="isLoggedIn" class="nav-item">Ajouter des employés</router-link>
       <button v-if="isLoggedIn" @click="logout" class="logout-button">Déconnexion</button>
     </nav>
   </header>

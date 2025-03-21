@@ -6,6 +6,7 @@ import Inscription from "./pages/Inscription.vue";
 import Importer from "./pages/Importer.vue";
 import NotFound from "./pages/NotFound.vue";
 import TechnicienDetails from "./pages/TechnicienDetails.vue";
+import AjouterEmploye from './pages/AjouteEmploye.vue';
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -25,15 +26,23 @@ const router = createRouter({
         },
         {
             path: '/nouveaumdp',
-            component: nouveaumdp
+            component: nouveaumdp,
+            meta: { requiresAuth: true }
         },
         {
             path: '/importer',
-            component: Importer
+            component: Importer,
+            meta: { requiresAuth: true }
         },
         {
             path: '/techniciendetail/:id',
-            component: TechnicienDetails
+            component: TechnicienDetails,
+            meta: { requiresAuth: true }
+        },
+        {
+            path:'/ajouteremploye',
+            component: AjouterEmploye,
+            meta : { requiresAuth : true }
         },
         {
             path: '/:pathMatch(.*)*', 

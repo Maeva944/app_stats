@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const pool = require("./db/db");
+const path = require('path');
 const techniciensRoutes = require("./routes/technicienRoute"); 
 const authRoute = require("./routes/Auth");
 const passwordRoute = require ("./routes/motdepasse");
@@ -10,6 +10,9 @@ const moisRoute = require("./routes/mois");
 const ConvertComConso = require("./routes/importComConso");
 const Commentaires = require("./routes/commentaires");
 const CategoriesRoute = require("./routes/categorie");
+const Metiers = require("./routes/metier");
+const Roles = require("./routes/roles");
+const AjoutEmploye = require("./routes/ajoutemploye");
 
 
 
@@ -27,6 +30,11 @@ app.use("/mois", moisRoute);
 app.use("/categories", CategoriesRoute);
 app.use("/converttwo", ConvertComConso)
 app.use("/commentaires", Commentaires)
+app.use("/metiers", Metiers);
+app.use("/roles", Roles);
+app.use("/add", AjoutEmploye);
+app.use('/upload', express.static(path.join(__dirname, 'upload')));
+
 
 
 const PORT = process.env.PORT || 3000;

@@ -2,7 +2,7 @@
   <p>ID du technicien : {{ $route.params.id }}</p>
 
   <div class="stat-container">
-    <img :src="technicien?.photo || defaultPhoto" alt="Photo du technicien" class="photo-tech" />
+    <img :src="technicien?.photo ? `/photo/${technicien.photo}` : defaultPhoto alt="Photo du technicien" class="photo-tech" />
     <div class="technicien-info">
       <h2>{{ technicien?.nom }} {{ technicien?.prenom }}</h2>
       <p>{{ technicien?.metier }}</p>
@@ -79,9 +79,9 @@ export default {
       anneeChoisie: new Date().getFullYear(),
       technicien: null,
       statistiques: {},
-      categorieActive: 1,
+      categorieActive: "",
       categories: [],
-      defaultPhoto: "https://via.placeholder.com/100",
+      defaultPhoto: "path/to/defaultpdp.png",
       aLAnnee: false,
       commentaires: [], 
     };
