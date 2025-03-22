@@ -196,6 +196,14 @@ export default {
             };
         });
 
+        Object.keys(statistiquesTransformees).forEach((categorie) => {
+      statistiquesTransformees[categorie].data.sort((a, b) => {
+        if (a.sous_categorie.toLowerCase() === "global") return 1;
+        if (b.sous_categorie.toLowerCase() === "global") return -1;
+        return 0;
+      });
+    });
+
         this.statistiques = statistiquesTransformees;
         console.log("📊 Données finales à afficher :", this.statistiques);
         this.categorieActive = Object.keys(this.statistiques)[0] || "";
