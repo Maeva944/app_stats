@@ -26,10 +26,10 @@ router.post("/", async (req, res) => {
 
      
     const result = await pool.query(`
-      SELECT u.id, u.email, u.password, u.must_change_password, u.technicien_matricule, r.nom AS role
+      SELECT u.id, u.email, u.password, u.must_change_password, u.technicien_id, r.nom AS roles
       FROM Users u
       JOIN Roles r ON u.role_id = r.id
-      WHERE u.email = $1
+      WHERE u.email = $1;
     `, [email]);
 
     if (result.rows.length === 0) {
@@ -43,7 +43,7 @@ router.post("/", async (req, res) => {
     // 🔹 Vérifier le mot de passe avec bcrypt.compare
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch && result.rows.length === 1) {
-      console.log("⛔ Mot de passe incorrect pour :", email);
+      console.log("Mot de passe incorrect pour :", email);
       return res.status(401).json({ error: "mot de passe incorrect." });
     }
 
@@ -54,11 +54,14 @@ router.post("/", async (req, res) => {
 
     // 🔹 Générer un token JWT pour la session
     const token = jwt.sign(
-      { id: user.id, role: user.role, technicien_matricule: user.technicien_matricule },
+      { id: user.id, role: user.role, technicien_matricule: user.technicien_id },
       "secret_key",
-      { expiresIn: "1h" }
+      { expiresIn: 3600 }
     );
-
+    const decoded = jwt.decode(token);
+    console.log("📅 Expiration du token (UTC) :", new Date(decoded.exp * 1000));
+    console.log("📅 Expiration du token (Locale) :", new Date(decoded.exp * 1000).toLocaleString());
+    
     res.json({ token });
 
   } catch (error) {

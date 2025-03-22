@@ -53,12 +53,28 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    const isAuthenticated = localStorage.getItem("token"); 
-    if (to.meta.requiresAuth && !isAuthenticated) {
-      next("/connexion"); 
-    } else {
-      next(); 
+    const token = localStorage.getItem("token"); 
+
+    if (to.meta.requiresAuth) {
+        if (!token) {
+            console.warn("🚫 Aucun token trouvé, redirection vers /connexion");
+            return next("/connexion");
+        }
+
+        // Vérifier si le token est expiré
+        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Décode le token JWT
+        const expTime = decodedToken.exp * 1000; // Convertir en millisecondes
+        const currentTime = Date.now();
+
+        if (currentTime >= expTime) {
+            console.warn("⏳ Token expiré, redirection vers /connexion");
+            localStorage.removeItem("token"); // Supprime le token
+            return next("/connexion");
+        }
     }
-  });
+
+    next(); 
+});
+
 
 export default router

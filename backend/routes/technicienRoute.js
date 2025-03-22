@@ -19,11 +19,12 @@ router.get('/techniciendetail/:id', async (req, res) => {
     try {
         // 🔹 Récupérer les infos du technicien
         const technicienResult = await pool.query(
-            `SELECT technicien.*, metiers.nom AS metier 
-            FROM technicien 
-            JOIN users ON technicien.matricule = users.technicien_matricule 
+            `SELECT technicien.*, metiers.nom AS metier
+            FROM technicien
+            JOIN users ON technicien.id = users.technicien_id
             JOIN metiers ON users.metier_id = metiers.id
-            WHERE technicien.id = $1;`,
+            WHERE technicien.id = $1;
+            `,
             [id]
         );
         
