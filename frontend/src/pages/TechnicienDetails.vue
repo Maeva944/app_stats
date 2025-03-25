@@ -28,9 +28,8 @@
   <div class="categories">
   <button
     v-for="categorie in categories"
-    @change="updateStats"
     :key="categorie.id"
-    @click="categorieActive = categorie.id"
+    @click="categorieActive = categorie.id; updateStats"
     :class="{ active: categorieActive === categorie.id }"
   >
     {{ categorie.nom }}
@@ -71,6 +70,7 @@
 
 <script>
 import { getData } from "../api";
+
 export default {
   data() {
     return {
@@ -83,168 +83,162 @@ export default {
       categories: [],
       defaultPhoto: "path/to/defaultpdp.png",
       aLAnnee: false,
-      commentaires: [], 
+      commentaires: []
     };
   },
-  async created(){
+
+  async created() {
     await this.fetchMois();
-    await this.fetchTechnicien();
-    await this.fetchStatistiques();
-    await this.fetchCommentaires();
     await this.fetchCategories();
+    await this.fetchTechnicien();
+    await this.fetchCommentaires();
+    await this.fetchStatistiques();
   },
-  
+
   methods: {
     async fetchCategories() {
-  try {
-    this.categories = await getData("/categories"); // 🔥 Appelle la nouvelle route API
-    console.log("📌 Catégories récupérées :", this.categories);
-  } catch (error) {
-    console.error("❌ Erreur de récupération des catégories :", error);
-  }
-  },
-    async fetchCommentaires() {
-    this.commentaires= [];
-    const id = this.$route.params.id;
-    if (!id) return;
-
-  let endpoint = `/commentaires/${id}?annee=${this.anneeChoisie}`;
-  
-  if (!this.aLAnnee && this.moisChoisi) {
-    endpoint += `&mois_id=${this.moisChoisi}`;
-  }
-
-  console.log(`🔎 Requête envoyée : ${endpoint}`)
-  console.log("📊 Statistiques mises à jour :", this.statistiques);
-
-  try {
-    this.commentaires = await getData(endpoint);
-    console.log("💬 Commentaires récupérés :", this.commentaires);
-  } catch (error) {
-    console.error("❌ Erreur de récupération des commentaires :", error);
-  }
-},
-    async fetchTechnicien() {
-    const id = this.$route.params.id; 
-    try {
-    const data = await getData(`/techniciendetail/${id}`);
-
-    if (data.error) {
-      alert(data.error);
-      return;
-    }
-
-    this.technicien = data.technicien;
-    
-    console.log("✅ Technicien récupéré :", this.technicien);
-  } catch (error) {
-    console.error("❌ Erreur de récupération des infos du technicien :", error);
-  }
-  },
-  async fetchMois() {
-  try {
-    this.moisDisponibles = await getData("/mois");
-  } catch (error) {
-    console.error("❌ Impossible de charger les mois :", error);
-    this.errorMessage = "Impossible de charger les mois.";
-  }
-  },
-  async fetchStatistiques() {
-    const id = this.$route.params.id;
-    if (!id) return;
-
-    let endpoint = `/statistiques/${id}?annee=${this.anneeChoisie}&categorie_id=${this.categorieActive}`;
-
-    if (!this.aLAnnee && this.moisChoisi) {
-        endpoint += `&mois_id=${this.moisChoisi}`;
-    }
-
-    // 🔥 Ajout du paramètre "aLAnnee"
-    endpoint += `&aLAnnee=${this.aLAnnee}`;
-
-    console.log(`📡 Requête envoyée à l'API : ${endpoint}`);
-
-    try {
-        const statsData = await getData(endpoint);
-        console.log("📊 Données reçues de l'API :", statsData);
-
-        // Vérifier que les stats sont bien un objet
-        if (!statsData || typeof statsData !== "object") {
-            console.error("❌ Données statistiques incorrectes :", statsData);
-            return;
+      try {
+        this.categories = await getData("/categories");
+        console.log("Catégories chargées :", this.categories);
+        
+        // Sélectionne la première catégorie par défaut
+        if (this.categories.length > 0) {
+          this.categorieActive = this.categories[0].id;
         }
-
-        let statistiquesTransformees = {};
-
-        // 🔹 Initialiser chaque catégorie, même si elle n'a pas encore de données
-        this.categories.forEach((categorie) => {
-            statistiquesTransformees[categorie.id] = {
-                mois: null,
-                annee: this.anneeChoisie,
-                data: []
-            };
-        });
-
-        // 🔹 Remplir les catégories avec leurs statistiques existantes
-        Object.keys(statsData).forEach((categorie) => {
-            const { mois, annee, data } = statsData[categorie];
-
-            statistiquesTransformees[categorie] = {
-                mois: mois || null,
-                annee: annee,
-                data: Array.isArray(data) ? data : []
-            };
-        });
-
-        Object.keys(statistiquesTransformees).forEach((categorie) => {
-      statistiquesTransformees[categorie].data.sort((a, b) => {
-        if (a.sous_categorie.toLowerCase() === "global") return 1;
-        if (b.sous_categorie.toLowerCase() === "global") return -1;
-        return 0;
-      });
-    });
-
-        this.statistiques = statistiquesTransformees;
-        console.log("📊 Données finales à afficher :", this.statistiques);
-        this.categorieActive = Object.keys(this.statistiques)[0] || "";
-
-    } catch (error) {
-        console.error("❌ Erreur de récupération des statistiques :", error);
-    }
-},
-toggleAnnee() {
-  console.log("🔄 Changement d'affichage (Année/Mois)");
-  this.aLAnnee = !this.aLAnnee;
-  this.fetchStatistiques();
-  this.fetchCommentaires();
-},
-updateStats(){
-  this.fetchCommentaires();
-  this.fetchStatistiques();
-},
-formatDate(dateString) {
-    if (!dateString) return "Date inconnue";
-
-    const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
-  }
-  },
-  watch: {
-    moisChoisi(newMois, oldMois) {
-        console.log(`📅 Changement de mois : ${oldMois} → ${newMois}`);
-        if (this.categorieActive === "NPS") {
-            this.fetchCommentaires();
-        }
+      } catch (error) {
+        console.error("Erreur catégories :", error);
+      }
     },
-    anneeChoisie(newAnnee, oldAnnee) {
-        console.log(`📅 Changement d'année : ${oldAnnee} → ${newAnnee}`);
-        if (this.categorieActive === "NPS") {
-            this.fetchCommentaires();
-        }
-    }
-}
 
-}
+    async fetchCommentaires() {
+      try {
+        const id = this.$route.params.id;
+        if (!id) return;
+
+        let endpoint = `/commentaires/${id}?annee=${this.anneeChoisie}`;
+        
+        if (!this.aLAnnee) {
+          endpoint += `&mois_id=${this.moisChoisi}`;
+        }
+
+        this.commentaires = await getData(endpoint);
+        console.log("Commentaires chargés :", this.commentaires);
+      } catch (error) {
+        console.error("Erreur commentaires :", error);
+      }
+    },
+
+    async fetchTechnicien() {
+      try {
+        const id = this.$route.params.id;
+        const data = await getData(`/techniciendetail/${id}`);
+
+        if (data.error) {
+          console.error(data.error);
+          return;
+        }
+
+        this.technicien = data.technicien;
+        console.log("Technicien chargé :", this.technicien);
+      } catch (error) {
+        console.error("Erreur technicien :", error);
+      }
+    },
+
+    async fetchMois() {
+      try {
+        this.moisDisponibles = await getData("/mois");
+        console.log("Mois chargés :", this.moisDisponibles);
+      } catch (error) {
+        console.error("Erreur mois :", error);
+      }
+    },
+
+    async fetchStatistiques() {
+      try {
+        const id = this.$route.params.id;
+        if (!id || !this.categorieActive) {
+          console.warn("ID ou catégorie manquante");
+          return;
+        }
+
+        let endpoint = `/statistiques/${id}?annee=${this.anneeChoisie}&categorie_id=${this.categorieActive}`;
+
+        if (!this.aLAnnee) {
+          endpoint += `&mois_id=${this.moisChoisi}`;
+        }
+
+        endpoint += `&aLAnnee=${this.aLAnnee}`;
+
+
+        const statsData = await getData(endpoint);
+        console.log("Stats brutes :", statsData);
+
+        // Transformation des données
+        this.statistiques = {};
+        
+        // On s'assure que toutes les catégories existent dans l'objet
+        this.categories.forEach(cat => {
+          this.statistiques[cat.id] = {
+            mois: this.aLAnnee ? null : this.moisChoisi,
+            annee: this.anneeChoisie,
+            data: []
+          };
+        });
+
+        // On remplit avec les données reçues
+        Object.keys(statsData).forEach(catId => {
+          if (this.statistiques[catId]) {
+            this.statistiques[catId].data = statsData[catId].data || [];
+            
+            // Tri pour mettre "Global" en bas
+            this.statistiques[catId].data.sort((a, b) => {
+              if (a.sous_categorie?.toLowerCase() === "global") return 1;
+              if (b.sous_categorie?.toLowerCase() === "global") return -1;
+              return 0;
+            });
+          }
+        });
+
+        console.log("Stats transformées :", this.statistiques);
+      } catch (error) {
+        console.error("Erreur stats :", error);
+      }
+    },
+
+    toggleAnnee() {
+      this.aLAnnee = !this.aLAnnee;
+      this.updateStats();
+    },
+
+    updateStats() {
+      this.fetchStatistiques();
+      this.fetchCommentaires();
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return "Date inconnue";
+      const date = new Date(dateString);
+      return date.toLocaleDateString("fr-FR", { 
+        year: "numeric", 
+        month: "long", 
+        day: "numeric" 
+      });
+    }
+  },
+
+  watch: {
+    moisChoisi() {
+      if (!this.aLAnnee) this.updateStats();
+    },
+    anneeChoisie() {
+      this.updateStats();
+    },
+    categorieActive() {
+      this.fetchStatistiques();
+    }
+  }
+};
 </script>
 
 <style scoped>

@@ -119,50 +119,70 @@
   
   <style scoped>
   .form-container {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
+    background: #fff;
+    padding: 5% 5%;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
     margin: 10% auto;
+    font-family: 'Arial', sans-serif;
+    border: 1px solid #c00d00;
   }
-  
+
   label {
     display: block;
-    margin-top: 10px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #333;
   }
-  
+
   input, select {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid #c2bfbf;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
   }
-  
+
+  select{
+    width: 106%;
+  }
+
+  input:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
   button {
-    width: 100%;
+    width: 105%;
     background-color: #e60f04;
-    color: white;
-    padding: 10px;
-    margin-top: 15px;
+    color: #fff;
+    padding: 12px;
+    margin-top: 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
-  
+
   button:hover {
     background-color: #c00d00;
   }
-  
+
   .success {
     color: green;
-    margin-top: 10px;
+    font-size: 14px;
+    margin-top: 12px;
   }
-  
+
   .error {
     color: red;
-    margin-top: 10px;
+    font-size: 14px;
+    margin-top: 12px;
   }
-  </style>
+</style>
+
   

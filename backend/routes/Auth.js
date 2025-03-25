@@ -55,8 +55,7 @@ router.post("/", async (req, res) => {
     // 🔹 Générer un token JWT pour la session
     const token = jwt.sign(
       { id: user.id, role: user.role, technicien_matricule: user.technicien_id },
-      "secret_key",
-      { expiresIn: 3600 }
+      "secret_key"
     );
     const decoded = jwt.decode(token);
     console.log("📅 Expiration du token (UTC) :", new Date(decoded.exp * 1000));
