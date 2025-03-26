@@ -72,7 +72,10 @@ router.beforeEach((to, from, next) => {
             const userRole = decoded.role_id;
             const technicienId = decoded.technicien_id;
 
-            // 🔴 Gestion des techniciens (role_id = 3)
+            if (userRole === 1){
+                next();
+            }
+
             if (userRole === 3) {
                 if (to.path === `/techniciendetail/${technicienId}`) {
                     return next(); 
@@ -82,15 +85,7 @@ router.beforeEach((to, from, next) => {
                 }
             }
 
-            // 🔵 Gestion des admins (role_id = 1)
-            if (userRole === 1) {
-                if (['/', '/importer', '/ajouteremploye'].includes(to.path)) {
-                    return next(); // Autorise l'accès aux pages admin
-                }
-            }
-
-            // Si aucun cas ne correspond, accès refusé
-            return next("/unauthorized");
+           return next("/unauthorized");
 
         } catch (error) {
             console.error("Erreur de décodage du token :", error);
